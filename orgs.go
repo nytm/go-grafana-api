@@ -9,8 +9,8 @@ import (
 )
 
 type Org struct {
-	Id   int64
-	Name string
+	Id   int64  `json:"id"`
+	Name string `json:"name"`
 }
 
 func (c *Client) Orgs() ([]Org, error) {
@@ -35,23 +35,31 @@ func (c *Client) Orgs() ([]Org, error) {
 	return orgs, err
 }
 
-func (c *Client) NewOrg(name string) error {
+func (c *Client) NewOrg(name string) (int64, error) {
 	settings := map[string]string{
 		"name": name,
 	}
 	data, err := json.Marshal(settings)
 	req, err := c.newRequest("POST", "/api/orgs", bytes.NewBuffer(data))
 	if err != nil {
-		return err
+		return 0, err
 	}
 	resp, err := c.Do(req)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	if resp.StatusCode != 200 {
-		return errors.New(resp.Status)
+		return 0, errors.New(resp.Status)
 	}
-	return err
+
+	body := struct {
+		ID int64 `json:"orgId"`
+	}{0}
+
+	data, err = ioutil.ReadAll(resp.Body)
+	json.Unmarshal(data, &body)
+
+	return body.ID, err
 }
 
 func (c *Client) DeleteOrg(id int64) error {
