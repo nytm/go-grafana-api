@@ -17,6 +17,50 @@ func (o Org) DataSources(c *Client) ([]*DataSource, error) {
 	return c.DataSourcesByOrgId(o.Id)
 }
 
+func (c *Client) Org(id int64) (Org, error) {
+	org := Org{}
+
+	req, err := c.newRequest("GET", fmt.Sprintf("/api/orgs/%d", id), nil)
+	if err != nil {
+		return org, err
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		return org, err
+	}
+	if resp.StatusCode != 200 {
+		return org, errors.New(resp.Status)
+	}
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return org, err
+	}
+	err = json.Unmarshal(data, &org)
+	return org, err
+}
+
+func (c *Client) OrgByName(name string) (Org, error) {
+	org := Org{}
+
+	req, err := c.newRequest("GET", fmt.Sprintf("/api/orgs/name/%s", name), nil)
+	if err != nil {
+		return org, err
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		return org, err
+	}
+	if resp.StatusCode != 200 {
+		return org, errors.New(resp.Status)
+	}
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return org, err
+	}
+	err = json.Unmarshal(data, &org)
+	return org, err
+}
+
 func (c *Client) Orgs() ([]Org, error) {
 	orgs := make([]Org, 0)
 
