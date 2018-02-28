@@ -137,3 +137,28 @@ func (c *Client) DeleteDataSource(id int64) error {
 
 	return nil
 }
+
+func (c *Client) DataSources() ([]*DataSource, error) {
+	path := "/api/datasources"
+	req, err := c.newRequest("GET", path, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != 200 {
+		return nil, errors.New(resp.Status)
+	}
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	result := []*DataSource{}
+	err = json.Unmarshal(data, &result)
+	return result, err
+}
