@@ -138,6 +138,22 @@ func (c *Client) DeleteDataSource(id int64) error {
 	return nil
 }
 
+func (c *Client) DataSourcesByOrgId(id int64) ([]*DataSource, error) {
+	out := []*DataSource{}
+	dss, err := c.DataSources()
+	if err != nil {
+		return out, err
+	}
+
+	for _, ds := range dss {
+		if ds.OrgId == id {
+			out = append(out, ds)
+		}
+	}
+
+	return out, nil
+}
+
 func (c *Client) DataSources() ([]*DataSource, error) {
 	path := "/api/datasources"
 	req, err := c.newRequest("GET", path, nil)

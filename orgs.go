@@ -13,6 +13,10 @@ type Org struct {
 	Name string `json:"name"`
 }
 
+func (o Org) DataSources(c *Client) ([]*DataSource, error) {
+	return c.DataSourcesByOrgId(o.Id)
+}
+
 func (c *Client) Orgs() ([]Org, error) {
 	orgs := make([]Org, 0)
 
