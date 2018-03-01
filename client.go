@@ -12,14 +12,15 @@ import (
 	"strings"
 )
 
+// Client represents a Grafana API client
 type Client struct {
 	key     string
 	baseURL url.URL
 	*http.Client
 }
 
-//New creates a new grafana client
-//auth can be in user:pass format, or it can be an api key
+// New creates a new grafana client
+// auth can be in user:pass format, or it can be an api key
 func New(auth, baseURL string) (*Client, error) {
 	u, err := url.Parse(baseURL)
 	if err != nil {
