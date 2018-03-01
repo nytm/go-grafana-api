@@ -8,14 +8,16 @@ import (
 	"io/ioutil"
 )
 
+// AlertNotification represents a Grafana alert notification
 type AlertNotification struct {
-	Id          int64       `json:"id,omitempty"`
-	Name        string      `json:"name"`
-	Type        string      `json:"type"`
-	IsDefault   bool        `json:"isDefault"`
-	Settings    interface{} `json:"settings"`
+	Id        int64       `json:"id,omitempty"`
+	Name      string      `json:"name"`
+	Type      string      `json:"type"`
+	IsDefault bool        `json:"isDefault"`
+	Settings  interface{} `json:"settings"`
 }
 
+// AlertNotification gets the alert with the given ID from Grafana
 func (c *Client) AlertNotification(id int64) (*AlertNotification, error) {
 	path := fmt.Sprintf("/api/alert-notifications/%d", id)
 	req, err := c.newRequest("GET", path, nil)
@@ -41,6 +43,7 @@ func (c *Client) AlertNotification(id int64) (*AlertNotification, error) {
 	return result, err
 }
 
+// NewAlertNotification creates the given alert notification object in Grafana
 func (c *Client) NewAlertNotification(a *AlertNotification) (int64, error) {
 	data, err := json.Marshal(a)
 	if err != nil {
@@ -71,6 +74,8 @@ func (c *Client) NewAlertNotification(a *AlertNotification) (int64, error) {
 	return result.Id, err
 }
 
+// UpdateAlertNotification wll update the alert notification in Grafana that matches
+// the ID from the given alert notification object
 func (c *Client) UpdateAlertNotification(a *AlertNotification) error {
 	path := fmt.Sprintf("/api/alert-notifications/%d", a.Id)
 	data, err := json.Marshal(a)
@@ -93,6 +98,8 @@ func (c *Client) UpdateAlertNotification(a *AlertNotification) error {
 	return nil
 }
 
+// DeleteAlertNotification will delete the alert notification from Grafana
+// matching the given ID
 func (c *Client) DeleteAlertNotification(id int64) error {
 	path := fmt.Sprintf("/api/alert-notifications/%d", id)
 	req, err := c.newRequest("DELETE", path, nil)

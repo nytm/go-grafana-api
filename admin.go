@@ -10,6 +10,7 @@ import (
 	"github.com/grafana/grafana/pkg/api/dtos"
 )
 
+// CreateUserForm will create a user from the given form
 func (c *Client) CreateUserForm(settings dtos.AdminCreateUserForm) error {
 	data, err := json.Marshal(settings)
 	req, err := c.newRequest("POST", "/api/admin/users", bytes.NewBuffer(data))
@@ -30,6 +31,7 @@ func (c *Client) CreateUserForm(settings dtos.AdminCreateUserForm) error {
 	return err
 }
 
+// DeleteUser deletes the user with the given ID from Grafana
 func (c *Client) DeleteUser(id int64) error {
 	req, err := c.newRequest("DELETE", fmt.Sprintf("/api/admin/users/%d", id), nil)
 	if err != nil {

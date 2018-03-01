@@ -8,22 +8,27 @@ import (
 	"io/ioutil"
 )
 
+// DashboardMeta holds dashboard metadata
 type DashboardMeta struct {
 	IsStarred bool   `json:"isStarred"`
 	Slug      string `json:"slug"`
 }
 
+// DashboardSaveResponse represents the response from the API when
+// a dashboard is saved
 type DashboardSaveResponse struct {
 	Slug    string `json:"slug"`
 	Status  string `json:"status"`
 	Version int64  `json:"version"`
 }
 
+// Dashboard represents a Grafana dashboard
 type Dashboard struct {
 	Meta  DashboardMeta          `json:"meta"`
 	Model map[string]interface{} `json:"dashboard"`
 }
 
+// SaveDashboard saves the given dashboard model to the API
 func (c *Client) SaveDashboard(model map[string]interface{}, overwrite bool) (*DashboardSaveResponse, error) {
 	wrapper := map[string]interface{}{
 		"dashboard": model,
@@ -56,6 +61,7 @@ func (c *Client) SaveDashboard(model map[string]interface{}, overwrite bool) (*D
 	return result, err
 }
 
+// Dashboard gets the dashboard with the given slug from Grafana
 func (c *Client) Dashboard(slug string) (*Dashboard, error) {
 	path := fmt.Sprintf("/api/dashboards/db/%s", slug)
 	req, err := c.newRequest("GET", path, nil)
@@ -81,6 +87,7 @@ func (c *Client) Dashboard(slug string) (*Dashboard, error) {
 	return result, err
 }
 
+// DeleteDashboard will delete the dashboard with the given slug from Grafana
 func (c *Client) DeleteDashboard(slug string) error {
 	path := fmt.Sprintf("/api/dashboards/db/%s", slug)
 	req, err := c.newRequest("DELETE", path, nil)

@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 )
 
+// DataSource represents a Grafana data source
 type DataSource struct {
 	Id     int64  `json:"id,omitempty"`
 	Name   string `json:"name"`
@@ -43,6 +44,7 @@ type SecureJSONData struct {
 	SecretKey string `json:"secretKey,omitempty"`
 }
 
+// NewDataSource will create the given data source in Grafana
 func (c *Client) NewDataSource(s *DataSource) (int64, error) {
 	data, err := json.Marshal(s)
 	if err != nil {
@@ -73,6 +75,8 @@ func (c *Client) NewDataSource(s *DataSource) (int64, error) {
 	return result.Id, err
 }
 
+// UpdateDataSource will update the data source in Grafana from the given
+// datasource object that matches the given datasource objects ID
 func (c *Client) UpdateDataSource(s *DataSource) error {
 	path := fmt.Sprintf("/api/datasources/%d", s.Id)
 	data, err := json.Marshal(s)
@@ -95,6 +99,7 @@ func (c *Client) UpdateDataSource(s *DataSource) error {
 	return nil
 }
 
+// DataSource will return the datasource with the given ID
 func (c *Client) DataSource(id int64) (*DataSource, error) {
 	path := fmt.Sprintf("/api/datasources/%d", id)
 	req, err := c.newRequest("GET", path, nil)
@@ -120,6 +125,7 @@ func (c *Client) DataSource(id int64) (*DataSource, error) {
 	return result, err
 }
 
+// DeleteDataSource will delete the datasource with the given ID from Grafana
 func (c *Client) DeleteDataSource(id int64) error {
 	path := fmt.Sprintf("/api/datasources/%d", id)
 	req, err := c.newRequest("DELETE", path, nil)
@@ -138,6 +144,7 @@ func (c *Client) DeleteDataSource(id int64) error {
 	return nil
 }
 
+// DataSourcesByOrgId will return the datasources for the given org ID
 func (c *Client) DataSourcesByOrgId(id int64) ([]*DataSource, error) {
 	out := []*DataSource{}
 	dss, err := c.DataSources()
@@ -154,6 +161,7 @@ func (c *Client) DataSourcesByOrgId(id int64) ([]*DataSource, error) {
 	return out, nil
 }
 
+// DataSources will return all the datasources from Grafana
 func (c *Client) DataSources() ([]*DataSource, error) {
 	path := "/api/datasources"
 	req, err := c.newRequest("GET", path, nil)

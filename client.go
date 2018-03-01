@@ -32,6 +32,7 @@ func New(auth, baseURL string) (*Client, error) {
 	} else {
 		key = fmt.Sprintf("Bearer %s", auth)
 	}
+
 	return &Client{
 		key,
 		*u,

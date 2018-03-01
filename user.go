@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 )
 
+// User represents a Grafana user
 type User struct {
 	Id      int64
 	Email   string
@@ -14,6 +15,7 @@ type User struct {
 	IsAdmin bool
 }
 
+// Users returns all the users from Grafana
 func (c *Client) Users() ([]User, error) {
 	users := make([]User, 0)
 	req, err := c.newRequest("GET", "/api/users", nil)

@@ -8,15 +8,19 @@ import (
 	"io/ioutil"
 )
 
+// Org represents an Organisation object in Grafana
 type Org struct {
 	Id   int64  `json:"id"`
 	Name string `json:"name"`
 }
 
+// DataSources use the given client to return the datasources
+// for the organisation
 func (o Org) DataSources(c *Client) ([]*DataSource, error) {
 	return c.DataSourcesByOrgId(o.Id)
 }
 
+// Org returns the organisation with the given ID
 func (c *Client) Org(id int64) (Org, error) {
 	org := Org{}
 
@@ -39,6 +43,7 @@ func (c *Client) Org(id int64) (Org, error) {
 	return org, err
 }
 
+// OrgByName returns the organisation with the given name
 func (c *Client) OrgByName(name string) (Org, error) {
 	org := Org{}
 
@@ -61,6 +66,7 @@ func (c *Client) OrgByName(name string) (Org, error) {
 	return org, err
 }
 
+// Orgs returns all the orgs in Grafana
 func (c *Client) Orgs() ([]Org, error) {
 	orgs := make([]Org, 0)
 
@@ -83,6 +89,7 @@ func (c *Client) Orgs() ([]Org, error) {
 	return orgs, err
 }
 
+// NewOrg creates an Org with the given name in Grafana
 func (c *Client) NewOrg(name string) (Org, error) {
 	org := Org{Name: name}
 	data, err := json.Marshal(org)
@@ -109,6 +116,7 @@ func (c *Client) NewOrg(name string) (Org, error) {
 	return org, err
 }
 
+// DeleteOrg deletes the given org ID from Grafana
 func (c *Client) DeleteOrg(id int64) error {
 	req, err := c.newRequest("DELETE", fmt.Sprintf("/api/orgs/%d", id), nil)
 	if err != nil {
