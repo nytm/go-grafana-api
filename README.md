@@ -1,10 +1,10 @@
-# grafana-api-golang-client
+# Golang Grafana API
 
 Grafana HTTP API Client for Go
 
 ## Installation
 
-    $ go get github.com/AutogrowSystems/grafana-api-golang-client
+    $ go get github.com/AutogrowSystems/go-grafana-api
 
 ## Usage
 
