@@ -83,21 +83,19 @@ func (c *Client) Orgs() ([]Org, error) {
 	return orgs, err
 }
 
-func (c *Client) NewOrg(name string) (int64, error) {
-	settings := map[string]string{
-		"name": name,
-	}
-	data, err := json.Marshal(settings)
+func (c *Client) NewOrg(name string) (Org, error) {
+	org := Org{Name: name}
+	data, err := json.Marshal(org)
 	req, err := c.newRequest("POST", "/api/orgs", bytes.NewBuffer(data))
 	if err != nil {
-		return 0, err
+		return org, err
 	}
 	resp, err := c.Do(req)
 	if err != nil {
-		return 0, err
+		return org, err
 	}
 	if resp.StatusCode != 200 {
-		return 0, errors.New(resp.Status)
+		return org, errors.New(resp.Status)
 	}
 
 	body := struct {
@@ -106,8 +104,9 @@ func (c *Client) NewOrg(name string) (int64, error) {
 
 	data, err = ioutil.ReadAll(resp.Body)
 	json.Unmarshal(data, &body)
+	org.Id = body.ID
 
-	return body.ID, err
+	return org, err
 }
 
 func (c *Client) DeleteOrg(id int64) error {
