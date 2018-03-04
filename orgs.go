@@ -8,6 +8,12 @@ import (
 	"io/ioutil"
 )
 
+const (
+	OrgUserRoleViewer = "Viewer"
+	OrgUserRoleAdmin  = "Admin"
+	OrgUserRoleEditor = "Editor"
+)
+
 // Org represents an Organisation object in Grafana
 type Org struct {
 	Id   int64  `json:"id"`
@@ -18,6 +24,43 @@ type Org struct {
 // for the organisation
 func (o Org) DataSources(c *Client) ([]*DataSource, error) {
 	return c.DataSourcesByOrgId(o.Id)
+}
+
+func (c *Client) AddUserToOrg(orgID int64, username, role string) error {
+	data, err := json.Marshal(map[string]string{"role": role, "loginOrEmail": username})
+	if err != nil {
+		return err
+	}
+
+	req, err := c.newRequest("POST", fmt.Sprintf("/api/orgs/%d/user", orgID), bytes.NewReader(data))
+	if err != nil {
+		return err
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode != 200 {
+		return errors.New(resp.Status)
+	}
+	_, err = ioutil.ReadAll(resp.Body)
+	return err
+}
+
+func (c *Client) RemoveUserFromOrg(orgID, userID int64) error {
+	req, err := c.newRequest("DELETE", fmt.Sprintf("/api/orgs/%d/users/%d", orgID, userID), nil)
+	if err != nil {
+		return err
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode != 200 {
+		return errors.New(resp.Status)
+	}
+	_, err = ioutil.ReadAll(resp.Body)
+	return err
 }
 
 // Org returns the organisation with the given ID
