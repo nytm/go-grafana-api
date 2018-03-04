@@ -3,7 +3,9 @@ package gapi
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
+	"log"
 )
 
 // User represents a Grafana user
@@ -12,6 +14,7 @@ type User struct {
 	Email   string
 	Name    string
 	Login   string
+	OrgId   string
 	IsAdmin bool
 }
 
@@ -38,4 +41,25 @@ func (c *Client) Users() ([]User, error) {
 		return users, err
 	}
 	return users, err
+}
+
+func (c *Client) UpdateDefaultOrg(userID, orgID int64) error {
+	req, err := c.newRequest("POST", fmt.Sprintf("/api/users/%d/using/%d", userID, orgID), nil)
+	if err != nil {
+		return err
+	}
+
+	req.URL.User = nil
+	log.Printf("%+v", req.URL)
+	req.Header.Set("Authorization", "Basic "+c.authBasic)
+	log.Printf("%+v", req.Header)
+	resp, err := c.Do(req)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode != 200 {
+		return errors.New(resp.Status)
+	}
+
+	return nil
 }
