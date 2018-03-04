@@ -40,9 +40,9 @@ func main() {
 
 	var cfgFile string
 	var create, read, find, list bool //, read, update, delete bool
-	var datasource, dashboard, org bool
+	var datasource, dashboard, org, user bool
 	var thingName string
-	var thingID int64
+	var thingID, switchOrg int64
 
 	flag.StringVar(&cfgFile, "c", defaultConfigPath, "config file")
 
@@ -54,9 +54,11 @@ func main() {
 	flag.BoolVar(&datasource, "datasource", false, "work with datasource")
 	flag.BoolVar(&dashboard, "dashboard", false, "work with dashboard")
 	flag.BoolVar(&org, "org", false, "work with org")
+	flag.BoolVar(&user, "user", false, "work with user")
 
 	flag.StringVar(&thingName, "name", "", "name to find by")
 	flag.Int64Var(&thingID, "id", 0, "id to find by")
+	flag.Int64Var(&switchOrg, "switchOrg", 0, "org ID to set when modifying user")
 
 	flag.Parse()
 
@@ -123,6 +125,28 @@ func main() {
 			}
 
 			fmt.Println(string(data))
+		}
+
+	case user:
+		switch {
+		case list:
+			users, err := client.Users()
+			panicIf(err)
+			fmt.Printf("%-6s %-50s %-50s %-50s\n", "ID", "LOGIN", "EMAIL", "NAME")
+			for _, u := range users {
+				fmt.Printf("%-6d %-50s %-50s %-50s\n", u.Id, u.Login, u.Email, u.Name)
+			}
+
+		case switchOrg != 0 && thingID != 0:
+			err := client.UpdateDefaultOrg(switchOrg, thingID)
+			if err != nil {
+				panic(err)
+			}
+			log.Println("Updated Org ID")
+
+		default:
+			log.Println("ERROR: no op to take")
+			os.Exit(1)
 		}
 
 	default:
