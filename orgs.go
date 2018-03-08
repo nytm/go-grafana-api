@@ -26,13 +26,19 @@ func (o Org) DataSources(c *Client) ([]*DataSource, error) {
 	return c.DataSourcesByOrgId(o.Id)
 }
 
-func (c *Client) AddUserToOrg(orgID int64, username, role string) error {
+// AddUser will add a user to the organisation
+func (o Org) AddUser(c *Client, username, role string) error {
+	validRole := role == OrgUserRoleAdmin || role == OrgUserRoleEditor || role == OrgUserRoleViewer
+	if !validRole {
+		return fmt.Errorf("invalid role name: %s", role)
+	}
+
 	data, err := json.Marshal(map[string]string{"role": role, "loginOrEmail": username})
 	if err != nil {
 		return err
 	}
 
-	req, err := c.newRequest("POST", fmt.Sprintf("/api/orgs/%d/user", orgID), bytes.NewReader(data))
+	req, err := c.newRequest("POST", fmt.Sprintf("/api/orgs/%d/users", o.Id), bytes.NewReader(data))
 	if err != nil {
 		return err
 	}
@@ -47,8 +53,9 @@ func (c *Client) AddUserToOrg(orgID int64, username, role string) error {
 	return err
 }
 
-func (c *Client) RemoveUserFromOrg(orgID, userID int64) error {
-	req, err := c.newRequest("DELETE", fmt.Sprintf("/api/orgs/%d/users/%d", orgID, userID), nil)
+// RemoveUser removes the user from the organisation
+func (o Org) RemoveUser(c *Client, userID int64) error {
+	req, err := c.newRequest("DELETE", fmt.Sprintf("/api/orgs/%d/users/%d", o.Id, userID), nil)
 	if err != nil {
 		return err
 	}
