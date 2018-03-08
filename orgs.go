@@ -20,6 +20,18 @@ func (o Org) DataSources(c *Client) ([]*DataSource, error) {
 	return c.DataSourcesByOrgId(o.Id)
 }
 
+// Dashboards use the given client to return the dashboards
+// for the organisation
+func (o Org) Dashboards(c *Client) ([]*Dashboard, error) {
+	return []*Dashboard{}, errors.New("not implemented")
+}
+
+// Users use the given client to return the users
+// for the organisation
+func (o Org) Users(c *Client) ([]User, error) {
+	return []User{}, errors.New("not implemented")
+}
+
 // Org returns the organisation with the given ID
 func (c *Client) Org(id int64) (Org, error) {
 	org := Org{}
