@@ -2,6 +2,7 @@ package gapi
 
 import (
 	"bytes"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
@@ -18,8 +19,9 @@ var ErrNotImplemented = errors.New("not implemented")
 
 // Client represents a Grafana API client
 type Client struct {
-	key     string
-	baseURL url.URL
+	key       string
+	baseURL   url.URL
+	authBasic string
 	*http.Client
 }
 
@@ -31,7 +33,9 @@ func New(auth, baseURL string) (*Client, error) {
 		return nil, err
 	}
 	key := ""
+	authBasic := ""
 	if strings.Contains(auth, ":") {
+		authBasic = base64.StdEncoding.EncodeToString([]byte(auth))
 		split := strings.Split(auth, ":")
 		u.User = url.UserPassword(split[0], split[1])
 	} else {
@@ -41,6 +45,7 @@ func New(auth, baseURL string) (*Client, error) {
 	return &Client{
 		key,
 		*u,
+		authBasic,
 		&http.Client{},
 	}, nil
 }

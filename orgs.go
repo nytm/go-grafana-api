@@ -8,6 +8,12 @@ import (
 	"io/ioutil"
 )
 
+const (
+	OrgUserRoleViewer = "Viewer"
+	OrgUserRoleAdmin  = "Admin"
+	OrgUserRoleEditor = "Editor"
+)
+
 // Org represents an Organisation object in Grafana
 type Org struct {
 	Id   int64  `json:"id"`
@@ -20,6 +26,33 @@ func (o Org) DataSources(c *Client) ([]*DataSource, error) {
 	return c.DataSourcesByOrgId(o.Id)
 }
 
+// AddUser will add a user to the organisation
+func (o Org) AddUser(c *Client, username, role string) error {
+	validRole := role == OrgUserRoleAdmin || role == OrgUserRoleEditor || role == OrgUserRoleViewer
+	if !validRole {
+		return fmt.Errorf("invalid role name: %s", role)
+	}
+
+	data, err := json.Marshal(map[string]string{"role": role, "loginOrEmail": username})
+	if err != nil {
+		return err
+	}
+
+	req, err := c.newRequest("POST", fmt.Sprintf("/api/orgs/%d/users", o.Id), bytes.NewReader(data))
+	if err != nil {
+		return err
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode != 200 {
+		return errors.New(resp.Status)
+	}
+	_, err = ioutil.ReadAll(resp.Body)
+	return err
+}
+
 // Dashboards use the given client to return the dashboards
 // for the organisation
 func (o Org) Dashboards(c *Client) ([]*Dashboard, error) {
@@ -30,6 +63,23 @@ func (o Org) Dashboards(c *Client) ([]*Dashboard, error) {
 // for the organisation
 func (o Org) Users(c *Client) ([]User, error) {
 	return []User{}, errors.New("not implemented")
+}
+
+// RemoveUser removes the user from the organisation
+func (o Org) RemoveUser(c *Client, userID int64) error {
+	req, err := c.newRequest("DELETE", fmt.Sprintf("/api/orgs/%d/users/%d", o.Id, userID), nil)
+	if err != nil {
+		return err
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode != 200 {
+		return errors.New(resp.Status)
+	}
+	_, err = ioutil.ReadAll(resp.Body)
+	return err
 }
 
 // Org returns the organisation with the given ID
