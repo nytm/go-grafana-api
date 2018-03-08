@@ -2,6 +2,7 @@ package gapi
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -11,6 +12,9 @@ import (
 	"path"
 	"strings"
 )
+
+var ErrNotFound = errors.New("not found")
+var ErrNotImplemented = errors.New("not implemented")
 
 // Client represents a Grafana API client
 type Client struct {
