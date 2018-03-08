@@ -17,9 +17,12 @@ type DashboardMeta struct {
 // DashboardSaveResponse represents the response from the API when
 // a dashboard is saved
 type DashboardSaveResponse struct {
-	Slug    string `json:"slug"`
+	ID      int64  `json:"id"`
+	UID     int64  `json:"uid"`
+	URL     string `json:"url"`
 	Status  string `json:"status"`
 	Version int64  `json:"version"`
+	Slug    string `json:"slug"`
 }
 
 // Dashboard represents a Grafana dashboard
