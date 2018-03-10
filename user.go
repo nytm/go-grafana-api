@@ -134,6 +134,26 @@ func (c *Client) SwitchUserOrg(userID, orgID int64) error {
 	return nil
 }
 
+// SwitchCurrentUserOrg will switch the current organisation of the signed in user
+func (c *Client) SwitchCurrentUserOrg(orgID int64) error {
+	req, err := c.newRequest("POST", fmt.Sprintf("/api/user/using/%d", orgID), nil)
+	if err != nil {
+		return err
+	}
+
+	req.URL.User = nil
+	resp, err := c.Do(req)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != 200 {
+		return errors.New(resp.Status)
+	}
+
+	return nil
+}
+
 // UserByEmail will find a user by their email address
 func (c *Client) UserByEmail(email string) (User, error) {
 	user := User{}
