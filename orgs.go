@@ -14,6 +14,22 @@ const (
 	OrgUserRoleEditor = "Editor"
 )
 
+type OrgUser struct {
+	User
+	Role  string `json:"role"`
+	OrgID int64  `json:"orgId"`
+}
+
+type OrgUsers []OrgUser
+
+func (ousers OrgUsers) Users() []User {
+	users := []User{}
+	for _, ou := range ousers {
+		users = append(users, ou.User)
+	}
+	return users
+}
+
 // Org represents an Organisation object in Grafana
 type Org struct {
 	Id   int64  `json:"id"`
@@ -61,8 +77,26 @@ func (o Org) Dashboards(c *Client) ([]*Dashboard, error) {
 
 // Users use the given client to return the users
 // for the organisation
-func (o Org) Users(c *Client) ([]User, error) {
-	return []User{}, errors.New("not implemented")
+func (o Org) Users(c *Client) ([]OrgUser, error) {
+	ousers := []OrgUser{}
+
+	req, err := c.newRequest("GET", fmt.Sprintf("/api/orgs/%d/users", o.Id), nil)
+	if err != nil {
+		return ousers, err
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		return ousers, err
+	}
+	if resp.StatusCode != 200 {
+		return ousers, errors.New(resp.Status)
+	}
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return ousers, err
+	}
+	err = json.Unmarshal(data, &ousers)
+	return ousers, err
 }
 
 // RemoveUser removes the user from the organisation
