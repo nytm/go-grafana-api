@@ -64,9 +64,9 @@ func (c *Client) SaveDashboard(model map[string]interface{}, overwrite bool) (*D
 	return result, err
 }
 
-// Dashboard gets the dashboard with the given slug from Grafana
-func (c *Client) Dashboard(slug string) (*Dashboard, error) {
-	path := fmt.Sprintf("/api/dashboards/db/%s", slug)
+// Dashboard gets the dashboard with the given URI from Grafana
+func (c *Client) Dashboard(uri string) (*Dashboard, error) {
+	path := fmt.Sprintf("/api/dashboards/%s", uri)
 	req, err := c.newRequest("GET", path, nil)
 	if err != nil {
 		return nil, err
