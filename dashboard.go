@@ -118,6 +118,25 @@ func (c *Client) DashboardMetas() ([]*DashboardMeta, error) {
 	return result, err
 }
 
+func (c *Client) Dashboards() ([]*Dashboard, error) {
+	dashes := []*Dashboard{}
+	metas, err := c.DashboardMetas()
+	if err != nil {
+		return dashes, err
+	}
+
+	for _, meta := range metas {
+		dash, err := c.Dashboard(meta.URI)
+		if err != nil {
+			return dashes, err
+		}
+
+		dashes = append(dashes, dash)
+	}
+
+	return dashes, nil
+}
+
 // DeleteDashboard will delete the dashboard with the given slug from Grafana
 func (c *Client) DeleteDashboard(slug string) error {
 	path := fmt.Sprintf("/api/dashboards/db/%s", slug)
