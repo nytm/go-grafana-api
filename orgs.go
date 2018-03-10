@@ -36,6 +36,10 @@ type Org struct {
 	Name string `json:"name"`
 }
 
+func (o Org) String() string {
+	return o.Name
+}
+
 // DataSources use the given client to return the datasources
 // for the organisation
 func (o Org) DataSources(c *Client) ([]*DataSource, error) {
