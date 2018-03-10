@@ -1,10 +1,10 @@
 package gapi
 
 import (
-	"bytes"
 	"encoding/base64"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -15,9 +15,9 @@ import (
 
 // Client represents a Grafana API client
 type Client struct {
-	key       string
-	baseURL   url.URL
-	authBasic string
+	bearerAuth string
+	basicAuth  string
+	baseURL    url.URL
 	*http.Client
 }
 
@@ -28,22 +28,25 @@ func New(auth, baseURL string) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	key := ""
-	authBasic := ""
-	if strings.Contains(auth, ":") {
-		authBasic = base64.StdEncoding.EncodeToString([]byte(auth))
-		split := strings.Split(auth, ":")
-		u.User = url.UserPassword(split[0], split[1])
-	} else {
-		key = fmt.Sprintf("Bearer %s", auth)
+
+	c := &Client{
+		Client:  &http.Client{},
+		baseURL: *u,
 	}
 
-	return &Client{
-		key,
-		*u,
-		authBasic,
-		&http.Client{},
-	}, nil
+	c.parseAuth(auth)
+
+	return c, nil
+}
+
+func (c *Client) parseAuth(auth string) {
+	if strings.Contains(auth, ":") {
+		c.basicAuth = fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString([]byte(auth)))
+		split := strings.Split(auth, ":")
+		c.baseURL.User = url.UserPassword(split[0], split[1])
+	} else {
+		c.bearerAuth = fmt.Sprintf("Bearer %s", auth)
+	}
 }
 
 func (c *Client) newRequest(method, requestPath string, body io.Reader) (*http.Request, error) {
@@ -53,15 +56,17 @@ func (c *Client) newRequest(method, requestPath string, body io.Reader) (*http.R
 	if err != nil {
 		return req, err
 	}
-	if c.key != "" {
-		req.Header.Add("Authorization", c.key)
+
+	if c.bearerAuth != "" {
+		req.Header.Add("Authorization", c.bearerAuth)
 	}
 
 	if os.Getenv("GF_LOG") != "" {
 		if body == nil {
 			log.Println("request to ", url.String(), "with no body data")
 		} else {
-			log.Println("request to ", url.String(), "with body data", body.(*bytes.Buffer).String())
+			data, _ := ioutil.ReadAll(body)
+			log.Println("request to ", url.String(), "with body data", string(data))
 		}
 	}
 
