@@ -19,9 +19,10 @@ var ErrNotImplemented = errors.New("not implemented")
 
 // Client represents a Grafana API client
 type Client struct {
-	bearerAuth string
-	basicAuth  string
-	baseURL    url.URL
+	bearerAuth     string
+	basicAuth      string
+	baseURL        url.URL
+	LastStatusCode int
 	*http.Client
 }
 
@@ -46,8 +47,6 @@ func New(auth, baseURL string) (*Client, error) {
 func (c *Client) parseAuth(auth string) {
 	if strings.Contains(auth, ":") {
 		c.basicAuth = fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString([]byte(auth)))
-		split := strings.Split(auth, ":")
-		c.baseURL.User = url.UserPassword(split[0], split[1])
 	} else {
 		c.bearerAuth = fmt.Sprintf("Bearer %s", auth)
 	}
@@ -59,6 +58,10 @@ func (c *Client) newRequest(method, requestPath string, body io.Reader) (*http.R
 	req, err := http.NewRequest(method, url.String(), body)
 	if err != nil {
 		return req, err
+	}
+
+	if c.basicAuth != "" {
+		req.Header.Add("Authorization", c.basicAuth)
 	}
 
 	if c.bearerAuth != "" {
