@@ -10,8 +10,12 @@ import (
 
 // DashboardMeta holds dashboard metadata
 type DashboardMeta struct {
-	IsStarred bool   `json:"isStarred"`
-	Slug      string `json:"slug"`
+	IsStarred bool     `json:"isStarred"`
+	Slug      string   `json:"slug"`
+	Title     string   `json:"title"`
+	URI       string   `json:"uri"`
+	Type      string   `json:"type"`
+	Tags      []string `json:"tags"`
 }
 
 // DashboardSaveResponse represents the response from the API when
@@ -86,6 +90,30 @@ func (c *Client) Dashboard(uri string) (*Dashboard, error) {
 	}
 
 	result := &Dashboard{}
+	err = json.Unmarshal(data, &result)
+	return result, err
+}
+
+func (c *Client) DashboardMetas() ([]*DashboardMeta, error) {
+	req, err := c.newRequest("GET", "/api/search", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != 200 {
+		return nil, errors.New(resp.Status)
+	}
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	result := []*DashboardMeta{}
 	err = json.Unmarshal(data, &result)
 	return result, err
 }
