@@ -53,6 +53,18 @@ func (o Org) AddUser(c *Client, username, role string) error {
 	return err
 }
 
+// Dashboards use the given client to return the dashboards
+// for the organisation
+func (o Org) Dashboards(c *Client) ([]*Dashboard, error) {
+	return []*Dashboard{}, errors.New("not implemented")
+}
+
+// Users use the given client to return the users
+// for the organisation
+func (o Org) Users(c *Client) ([]User, error) {
+	return []User{}, errors.New("not implemented")
+}
+
 // RemoveUser removes the user from the organisation
 func (o Org) RemoveUser(c *Client, userID int64) error {
 	req, err := c.newRequest("DELETE", fmt.Sprintf("/api/orgs/%d/users/%d", o.Id, userID), nil)
