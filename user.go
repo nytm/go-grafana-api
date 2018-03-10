@@ -21,6 +21,18 @@ type User struct {
 	Password string `json:"password,omitempty"`
 }
 
+type Users []User
+
+func (users Users) FindByEmail(email string) (User, bool) {
+	for _, u := range users {
+		if u.Email == email {
+			return u, true
+		}
+	}
+
+	return User{}, false
+}
+
 func (u User) Using(c *Client, orgID int64) error {
 	req, err := c.newRequest("POST", fmt.Sprintf("/api/users/%d/using/%d", u.Id, orgID), nil)
 	if err != nil {
