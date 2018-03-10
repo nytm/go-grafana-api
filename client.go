@@ -1,6 +1,7 @@
 package gapi
 
 import (
+	"bytes"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -46,6 +47,20 @@ func New(auth, baseURL string) (*Client, error) {
 
 func (c *Client) Do(req *http.Request) (*http.Response, error) {
 	res, err := c.Client.Do(req)
+	if os.Getenv("GF_LOG") == "2" {
+		log.Println("===> GAPI: request headers:")
+		res.Request.Header.Write(os.Stdout)
+		log.Println("===> GAPI: response headers:")
+		res.Header.Write(os.Stdout)
+
+		buf1 := bytes.NewBuffer([]byte{})
+		buf2 := bytes.NewBuffer([]byte{})
+		mw := io.MultiWriter(buf1, buf2)
+		_, _ = io.Copy(mw, res.Body)
+		res.Body = ioutil.NopCloser(bytes.NewReader(buf1.Bytes()))
+		log.Println("===> GAPI: response body:", string(buf2.Bytes()))
+	}
+
 	c.LastStatusCode = res.StatusCode
 	return res, err
 }
@@ -75,14 +90,14 @@ func (c *Client) newRequest(method, requestPath string, body io.Reader) (*http.R
 	}
 
 	if os.Getenv("GF_LOG") != "" {
-		if body == nil {
-			log.Println("request to ", url.String(), "with no body data")
-		} else {
+		log.Println("===> GAPI: request to ", url.String(), "with no body data")
+		if body != nil {
 			data, _ := ioutil.ReadAll(body)
-			log.Println("request to ", url.String(), "with body data", string(data))
+			log.Println("===> GAPI: request body:", string(data))
 		}
 	}
 
 	req.Header.Add("Content-Type", "application/json")
+
 	return req, err
 }
