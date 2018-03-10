@@ -44,6 +44,12 @@ func New(auth, baseURL string) (*Client, error) {
 	return c, nil
 }
 
+func (c *Client) Do(req *http.Request) (*http.Response, error) {
+	res, err := c.Client.Do(req)
+	c.LastStatusCode = res.StatusCode
+	return res, err
+}
+
 func (c *Client) parseAuth(auth string) {
 	if strings.Contains(auth, ":") {
 		c.basicAuth = fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString([]byte(auth)))
