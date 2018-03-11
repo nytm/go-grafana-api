@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"path"
 	"strings"
 )
 
@@ -65,9 +64,8 @@ func (c *Client) parseAuth(auth string) {
 }
 
 func (c *Client) newRequest(method, requestPath string, body io.Reader) (*http.Request, error) {
-	url := c.baseURL
-	url.Path = path.Join(url.Path, requestPath)
-	req, err := http.NewRequest(method, url.String(), body)
+	url := c.baseURL.String() + requestPath
+	req, err := http.NewRequest(method, url, body)
 	if err != nil {
 		return req, err
 	}
