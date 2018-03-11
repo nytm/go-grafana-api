@@ -46,3 +46,55 @@ func (c *Client) DeleteUser(id int64) error {
 	}
 	return err
 }
+
+// Stats will get the stats from the API
+func (c *Client) Stats() (map[string]int64, error) {
+	v := map[string]int64{}
+	req, err := c.newRequest("GET", "/api/admin/stats", nil)
+	if err != nil {
+		return v, err
+	}
+
+	resp, err := c.Do(req)
+	if err != nil {
+		return v, err
+	}
+
+	if resp.StatusCode != 200 {
+		return v, errors.New(resp.Status)
+	}
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return v, err
+	}
+
+	err = json.Unmarshal(data, &v)
+	return v, err
+}
+
+// FrontEndSettings will get the front end settings from the API
+func (c *Client) FrontEndSettings() (map[string]interface{}, error) {
+	v := map[string]interface{}{}
+	req, err := c.newRequest("GET", "/api/frontend/settings", nil)
+	if err != nil {
+		return v, err
+	}
+
+	resp, err := c.Do(req)
+	if err != nil {
+		return v, err
+	}
+
+	if resp.StatusCode != 200 {
+		return v, errors.New(resp.Status)
+	}
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return v, err
+	}
+
+	err = json.Unmarshal(data, &v)
+	return v, err
+}
