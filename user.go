@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/url"
 
 	"github.com/grafana/grafana/pkg/api/dtos"
 )
@@ -157,7 +158,11 @@ func (c *Client) SwitchCurrentUserOrg(orgID int64) error {
 // UserByEmail will find a user by their email address
 func (c *Client) UserByEmail(email string) (User, error) {
 	user := User{}
-	req, err := c.newRequest("GET", "/api/users/lookup?loginOrEmail="+email, nil)
+
+	values := url.Values{}
+	values.Set("loginOrEmail", email)
+
+	req, err := c.newRequest("GET", "/api/users/lookup?"+values.Encode(), nil)
 	if err != nil {
 		return user, err
 	}
