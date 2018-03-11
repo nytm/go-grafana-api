@@ -34,6 +34,16 @@ func (users Users) FindByEmail(email string) (User, bool) {
 	return User{}, false
 }
 
+func (users Users) FindIndexByEmail(email string) (int, bool) {
+	for i, u := range users {
+		if u.Email == email {
+			return i, true
+		}
+	}
+
+	return 0, false
+}
+
 func (u User) Using(c *Client, orgID int64) error {
 	req, err := c.newRequest("POST", fmt.Sprintf("/api/users/%d/using/%d", u.Id, orgID), nil)
 	if err != nil {
