@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -47,19 +46,11 @@ func New(auth, baseURL string) (*Client, error) {
 
 func (c *Client) Do(req *http.Request) (*http.Response, error) {
 	res, err := c.Client.Do(req)
-	if os.Getenv("GF_LOG") == "2" {
-		log.Println("===> GAPI: request headers:")
-		res.Request.Header.Write(os.Stdout)
-		log.Println("===> GAPI: response headers:")
-		res.Header.Write(os.Stdout)
-
-		buf1 := bytes.NewBuffer([]byte{})
-		buf2 := bytes.NewBuffer([]byte{})
-		mw := io.MultiWriter(buf1, buf2)
-		_, _ = io.Copy(mw, res.Body)
-		res.Body = ioutil.NopCloser(bytes.NewReader(buf1.Bytes()))
-		log.Println("===> GAPI: response body:", string(buf2.Bytes()))
+	if err != nil {
+		return res, err
 	}
+
+	logResponse(res)
 
 	c.LastStatusCode = res.StatusCode
 	return res, err
@@ -89,15 +80,47 @@ func (c *Client) newRequest(method, requestPath string, body io.Reader) (*http.R
 		req.Header.Add("Authorization", c.bearerAuth)
 	}
 
-	if os.Getenv("GF_LOG") != "" {
-		log.Println("===> GAPI: request to ", url.String(), "with no body data")
-		if body != nil {
-			data, _ := ioutil.ReadAll(body)
-			log.Println("===> GAPI: request body:", string(data))
-		}
-	}
-
 	req.Header.Add("Content-Type", "application/json")
 
+	logRequest(req)
+
 	return req, err
+}
+
+func logRequest(req *http.Request) {
+	if os.Getenv("GF_LOG") == "" {
+		return
+	}
+
+	fmt.Println("\nHTTP/1.1", req.Method, req.URL)
+	req.Header.Write(os.Stdout)
+
+	if req.Body != nil {
+		data, _ := ioutil.ReadAll(req.Body)
+		fmt.Println(string(data))
+	}
+
+	fmt.Println("")
+}
+
+func logResponse(res *http.Response) {
+	if os.Getenv("GF_LOG") == "" {
+		return
+	}
+
+	fmt.Println("\nRESPONSE HEADERS:")
+	res.Header.Write(os.Stdout)
+
+	if os.Getenv("GF_LOG") != "2" {
+		return
+	}
+
+	buf1 := bytes.NewBuffer([]byte{})
+	buf2 := bytes.NewBuffer([]byte{})
+	mw := io.MultiWriter(buf1, buf2)
+	_, _ = io.Copy(mw, res.Body)
+	res.Body = ioutil.NopCloser(bytes.NewReader(buf1.Bytes()))
+	fmt.Println("")
+	fmt.Println(string(buf2.Bytes()))
+	fmt.Println("")
 }
