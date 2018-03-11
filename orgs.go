@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net/url"
+	"strings"
 )
 
 const (
@@ -71,12 +73,6 @@ func (o Org) AddUser(c *Client, username, role string) error {
 	}
 	_, err = ioutil.ReadAll(resp.Body)
 	return err
-}
-
-// Dashboards use the given client to return the dashboards
-// for the organisation
-func (o Org) Dashboards(c *Client) ([]*Dashboard, error) {
-	return []*Dashboard{}, errors.New("not implemented")
 }
 
 // Users use the given client to return the users
@@ -147,6 +143,8 @@ func (c *Client) Org(id int64) (Org, error) {
 func (c *Client) OrgByName(name string) (Org, error) {
 	org := Org{}
 
+	name = url.QueryEscape(name)
+	name = strings.Replace(name, "+", "%20", -1)
 	req, err := c.newRequest("GET", fmt.Sprintf("/api/orgs/name/%s", name), nil)
 	if err != nil {
 		return org, err
@@ -155,6 +153,11 @@ func (c *Client) OrgByName(name string) (Org, error) {
 	if err != nil {
 		return org, err
 	}
+
+	if resp.StatusCode == 404 {
+		return org, ErrNotFound // TODO: make everything like this
+	}
+
 	if resp.StatusCode != 200 {
 		return org, errors.New(resp.Status)
 	}
@@ -192,7 +195,7 @@ func (c *Client) Orgs() ([]Org, error) {
 // NewOrg creates an Org with the given name in Grafana
 func (c *Client) NewOrg(name string) (Org, error) {
 	org := Org{Name: name}
-	data, err := json.Marshal(org)
+	data, err := json.Marshal(map[string]string{"name": name})
 	req, err := c.newRequest("POST", "/api/orgs", bytes.NewBuffer(data))
 	if err != nil {
 		return org, err
