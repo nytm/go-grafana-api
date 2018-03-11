@@ -17,7 +17,7 @@ const (
 type OrgUser struct {
 	User
 	Role  string `json:"role"`
-	OrgID int64  `json:"orgId"`
+	OrgID int64  `json:"org_id"`
 }
 
 type OrgUsers []OrgUser
