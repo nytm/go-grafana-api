@@ -27,7 +27,7 @@ var (
 type Client struct {
 	bearerAuth     string
 	basicAuth      string
-	baseURL        url.URL
+	baseURL        string
 	LastStatusCode int
 	*http.Client
 }
@@ -42,7 +42,7 @@ func New(auth, baseURL string) (*Client, error) {
 
 	c := &Client{
 		Client:  &http.Client{},
-		baseURL: *u,
+		baseURL: u.String(),
 	}
 
 	c.parseAuth(auth)
@@ -79,7 +79,7 @@ func (c *Client) jsonRequest(method, requestPath string, v interface{}) (*http.R
 }
 
 func (c *Client) newRequest(method, requestPath string, body io.Reader) (*http.Request, error) {
-	url := c.baseURL.String() + requestPath
+	url := c.baseURL + requestPath
 	req, err := http.NewRequest(method, url, body)
 	if err != nil {
 		return req, err
