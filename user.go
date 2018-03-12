@@ -19,18 +19,18 @@ type User struct {
 }
 
 // Users is a collection of user models
-type Users []User
+type Users []*User
 
 // FindByEmail returns the user with the given email from a
 // collection of users, and a false if it was not found
-func (users Users) FindByEmail(email string) (User, bool) {
+func (users Users) FindByEmail(email string) (*User, bool) {
 	for _, u := range users {
 		if u.Email == email {
 			return u, true
 		}
 	}
 
-	return User{}, false
+	return &User{}, false
 }
 
 // FindIndexByEmail is like FindByEmail but it returns the index
@@ -50,8 +50,8 @@ func (u User) SwitchOrg(c *Client, orgID int64) error {
 }
 
 // Users returns all the users from Grafana
-func (c *Client) Users() ([]User, error) {
-	users := make([]User, 0)
+func (c *Client) Users() ([]*User, error) {
+	users := make([]*User, 0)
 	res, err := c.doRequest("GET", "/api/users", nil)
 	if err != nil {
 		return users, err
@@ -66,8 +66,8 @@ func (c *Client) Users() ([]User, error) {
 }
 
 // User returns the user with the given id
-func (c *Client) User(id int64) (User, error) {
-	user := User{}
+func (c *Client) User(id int64) (*User, error) {
+	user := &User{}
 	res, err := c.doRequest("GET", fmt.Sprintf("/api/users/%d", id), nil)
 	if err != nil {
 		return user, err
@@ -115,8 +115,8 @@ func (c *Client) SwitchCurrentUserOrg(orgID int64) error {
 }
 
 // UserByEmail will find a user by their email address
-func (c *Client) UserByEmail(email string) (User, error) {
-	user := User{}
+func (c *Client) UserByEmail(email string) (*User, error) {
+	user := &User{}
 
 	values := url.Values{}
 	values.Set("loginOrEmail", email)

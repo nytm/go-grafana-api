@@ -23,13 +23,13 @@ type OrgUser struct {
 }
 
 // OrgUsers is a collection of Org user models
-type OrgUsers []OrgUser
+type OrgUsers []*OrgUser
 
 // Users returns the user objects from a collection of org users
-func (ousers OrgUsers) Users() []User {
-	users := []User{}
+func (ousers OrgUsers) Users() []*User {
+	users := []*User{}
 	for _, ou := range ousers {
-		users = append(users, ou.User)
+		users = append(users, &ou.User)
 	}
 	return users
 }
@@ -69,8 +69,8 @@ func (o Org) AddUser(c *Client, username, role string) error {
 
 // Users use the given client to return the users
 // for the organisation
-func (o Org) Users(c *Client) ([]OrgUser, error) {
-	ousers := []OrgUser{}
+func (o Org) Users(c *Client) ([]*OrgUser, error) {
+	ousers := []*OrgUser{}
 
 	res, err := c.doRequest("GET", fmt.Sprintf("/api/orgs/%d/users", o.ID), nil)
 	if err != nil {
