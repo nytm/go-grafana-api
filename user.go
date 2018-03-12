@@ -44,6 +44,29 @@ func (users Users) FindIndexByEmail(email string) (int, bool) {
 	return 0, false
 }
 
+// FindByLogin returns the user with the given email from a
+// collection of users, and a false if it was not found
+func (users Users) FindByLogin(login string) (*User, bool) {
+	for _, u := range users {
+		if u.Login == login {
+			return u, true
+		}
+	}
+
+	return &User{}, false
+}
+
+// FindIndexByLogin is like FindByEmail but it returns the index
+func (users Users) FindIndexByLogin(login string) (int, bool) {
+	for i, u := range users {
+		if u.Login == login {
+			return i, true
+		}
+	}
+
+	return 0, false
+}
+
 // SwitchOrg will change the current org context for the user
 func (u User) SwitchOrg(c *Client, orgID int64) error {
 	return c.SwitchUserOrg(u.ID, orgID)
@@ -132,4 +155,9 @@ func (c *Client) UserByEmail(email string) (*User, error) {
 
 	err = res.BindJSON(&user)
 	return user, err
+}
+
+// UserByLogin will find a user by their login
+func (c *Client) UserByLogin(login string) (*User, error) {
+	return c.UserByEmail(login)
 }
