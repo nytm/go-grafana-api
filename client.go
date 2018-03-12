@@ -141,6 +141,7 @@ func logResponse(res *http.Response) {
 
 	fmt.Println("\nRESPONSE HEADERS:")
 	res.Header.Write(os.Stdout)
+	fmt.Println("Status-Code:", res.StatusCode)
 
 	if os.Getenv("GF_LOG") != "2" {
 		return
