@@ -60,6 +60,10 @@ func (res *Response) Error() error {
 		return ErrNotFound
 	case 409:
 		return ErrConflict
+	case 401:
+		return ErrNotAuthorized
+	case 500:
+		return ErrInternalServerError
 	default:
 		return fmt.Errorf(res.Status)
 	}

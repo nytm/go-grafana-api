@@ -21,6 +21,10 @@ var (
 	ErrConflict = errors.New(http.StatusText(409))
 	// ErrNotImplemented 501
 	ErrNotImplemented = errors.New(http.StatusText(501))
+	// ErrNotAuthorized 401
+	ErrNotAuthorized = errors.New(http.StatusText(401))
+	// ErrInternalServerError 500
+	ErrInternalServerError = errors.New(http.StatusText(500))
 )
 
 // Client represents a Grafana API client
