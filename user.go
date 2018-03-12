@@ -18,8 +18,11 @@ type User struct {
 	Password string `json:"password,omitempty"`
 }
 
+// Users is a collection of user models
 type Users []User
 
+// FindByEmail returns the user with the given email from a
+// collection of users, and a false if it was not found
 func (users Users) FindByEmail(email string) (User, bool) {
 	for _, u := range users {
 		if u.Email == email {
@@ -30,6 +33,7 @@ func (users Users) FindByEmail(email string) (User, bool) {
 	return User{}, false
 }
 
+// FindIndexByEmail is like FindByEmail but it returns the index
 func (users Users) FindIndexByEmail(email string) (int, bool) {
 	for i, u := range users {
 		if u.Email == email {
@@ -40,6 +44,7 @@ func (users Users) FindIndexByEmail(email string) (int, bool) {
 	return 0, false
 }
 
+// SwitchOrg will change the current org context for the user
 func (u User) SwitchOrg(c *Client, orgID int64) error {
 	return c.SwitchUserOrg(u.Id, orgID)
 }
@@ -60,6 +65,7 @@ func (c *Client) Users() ([]User, error) {
 	return users, err
 }
 
+// User returns the user with the given id
 func (c *Client) User(id int64) (User, error) {
 	user := User{}
 	res, err := c.doRequest("GET", fmt.Sprintf("/api/users/%d", id), nil)

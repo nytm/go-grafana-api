@@ -14,9 +14,14 @@ import (
 	"strings"
 )
 
-var ErrNotFound = errors.New(http.StatusText(404))
-var ErrConflict = errors.New(http.StatusText(409))
-var ErrNotImplemented = errors.New(http.StatusText(501))
+var (
+	// ErrNotFound 404
+	ErrNotFound = errors.New(http.StatusText(404))
+	// ErrConflict 409
+	ErrConflict = errors.New(http.StatusText(409))
+	// ErrNotImplemented 501
+	ErrNotImplemented = errors.New(http.StatusText(501))
+)
 
 // Client represents a Grafana API client
 type Client struct {
@@ -45,6 +50,8 @@ func New(auth, baseURL string) (*Client, error) {
 	return c, nil
 }
 
+// Do overrides the Do method to hook in a response logger before
+// returning the response
 func (c *Client) Do(req *http.Request) (*http.Response, error) {
 	res, err := c.Client.Do(req)
 	if err != nil {
@@ -147,57 +154,4 @@ func logResponse(res *http.Response) {
 	fmt.Println("")
 	fmt.Println(string(buf2.Bytes()))
 	fmt.Println("")
-}
-
-func NewResponse(res *http.Response, rerr error) *Response {
-	var data []byte
-
-	if res.Body != nil {
-		data, _ = ioutil.ReadAll(res.Body)
-	}
-
-	return &Response{
-		res,
-		data,
-		rerr,
-	}
-}
-
-type Response struct {
-	*http.Response
-	data []byte
-	err  error
-}
-
-func (res *Response) OK() bool {
-	return res.Error() == nil
-}
-
-func (res *Response) BindJSON(v interface{}) error {
-	return json.Unmarshal(res.data, v)
-}
-
-func (res *Response) Message() string {
-	data := struct {
-		Msg string `json:"message"`
-	}{}
-	res.BindJSON(&data)
-	return data.Msg
-}
-
-func (res *Response) Error() error {
-	if res.err != nil {
-		return res.err
-	}
-
-	switch res.StatusCode {
-	case 200:
-		return nil
-	case 404:
-		return ErrNotFound
-	case 409:
-		return ErrConflict
-	default:
-		return fmt.Errorf(res.Status)
-	}
 }

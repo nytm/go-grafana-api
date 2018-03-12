@@ -7,19 +7,25 @@ import (
 )
 
 const (
+	// OrgUserRoleViewer is the readonly role
 	OrgUserRoleViewer = "Viewer"
-	OrgUserRoleAdmin  = "Admin"
+	// OrgUserRoleAdmin is the admin role
+	OrgUserRoleAdmin = "Admin"
+	// OrgUserRoleEditor is the editing role
 	OrgUserRoleEditor = "Editor"
 )
 
+// OrgUser is a user of the org
 type OrgUser struct {
 	User
 	Role  string `json:"role"`
 	OrgID int64  `json:"org_id"`
 }
 
+// OrgUsers is a collection of Org user models
 type OrgUsers []OrgUser
 
+// Users returns the user objects from a collection of org users
 func (ousers OrgUsers) Users() []User {
 	users := []User{}
 	for _, ou := range ousers {

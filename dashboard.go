@@ -69,6 +69,9 @@ func (c *Client) Dashboard(uri string) (*Dashboard, error) {
 	return result, err
 }
 
+// DashboardMetas returns the dashboard metadata for the current
+// organisation context.  These can then be used to get specific
+// dashboards
 func (c *Client) DashboardMetas() ([]*DashboardMeta, error) {
 	res, err := c.doRequest("GET", "/api/search", nil)
 	if err != nil {
@@ -84,6 +87,7 @@ func (c *Client) DashboardMetas() ([]*DashboardMeta, error) {
 	return result, err
 }
 
+// Dashboards returns the dashboards for the current org
 func (c *Client) Dashboards() ([]*Dashboard, error) {
 	dashes := []*Dashboard{}
 	metas, err := c.DashboardMetas()
