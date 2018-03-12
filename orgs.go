@@ -1,11 +1,7 @@
 package gapi
 
 import (
-	"bytes"
-	"encoding/json"
-	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/url"
 	"strings"
 )
@@ -55,24 +51,14 @@ func (o Org) AddUser(c *Client, username, role string) error {
 		return fmt.Errorf("invalid role name: %s", role)
 	}
 
-	data, err := json.Marshal(map[string]string{"role": role, "loginOrEmail": username})
+	acl := map[string]string{"role": role, "loginOrEmail": username}
+
+	res, err := c.doJSONRequest("POST", fmt.Sprintf("/api/orgs/%d/users", o.Id), acl)
 	if err != nil {
 		return err
 	}
 
-	req, err := c.newRequest("POST", fmt.Sprintf("/api/orgs/%d/users", o.Id), bytes.NewReader(data))
-	if err != nil {
-		return err
-	}
-	resp, err := c.Do(req)
-	if err != nil {
-		return err
-	}
-	if resp.StatusCode != 200 {
-		return errors.New(resp.Status)
-	}
-	_, err = ioutil.ReadAll(resp.Body)
-	return err
+	return res.Error()
 }
 
 // Users use the given client to return the users
@@ -80,62 +66,43 @@ func (o Org) AddUser(c *Client, username, role string) error {
 func (o Org) Users(c *Client) ([]OrgUser, error) {
 	ousers := []OrgUser{}
 
-	req, err := c.newRequest("GET", fmt.Sprintf("/api/orgs/%d/users", o.Id), nil)
+	res, err := c.doRequest("GET", fmt.Sprintf("/api/orgs/%d/users", o.Id), nil)
 	if err != nil {
 		return ousers, err
 	}
-	resp, err := c.Do(req)
-	if err != nil {
-		return ousers, err
+
+	if !res.OK() {
+		return ousers, res.Error()
 	}
-	if resp.StatusCode != 200 {
-		return ousers, errors.New(resp.Status)
-	}
-	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return ousers, err
-	}
-	err = json.Unmarshal(data, &ousers)
+
+	err = res.BindJSON(&ousers)
 	return ousers, err
 }
 
 // RemoveUser removes the user from the organisation
 func (o Org) RemoveUser(c *Client, userID int64) error {
-	req, err := c.newRequest("DELETE", fmt.Sprintf("/api/orgs/%d/users/%d", o.Id, userID), nil)
+	res, err := c.doRequest("DELETE", fmt.Sprintf("/api/orgs/%d/users/%d", o.Id, userID), nil)
 	if err != nil {
 		return err
 	}
-	resp, err := c.Do(req)
-	if err != nil {
-		return err
-	}
-	if resp.StatusCode != 200 {
-		return errors.New(resp.Status)
-	}
-	_, err = ioutil.ReadAll(resp.Body)
-	return err
+
+	return res.Error()
 }
 
 // Org returns the organisation with the given ID
 func (c *Client) Org(id int64) (Org, error) {
 	org := Org{}
 
-	req, err := c.newRequest("GET", fmt.Sprintf("/api/orgs/%d", id), nil)
+	res, err := c.doRequest("GET", fmt.Sprintf("/api/orgs/%d", id), nil)
 	if err != nil {
 		return org, err
 	}
-	resp, err := c.Do(req)
-	if err != nil {
-		return org, err
+
+	if !res.OK() {
+		return org, res.Error()
 	}
-	if resp.StatusCode != 200 {
-		return org, errors.New(resp.Status)
-	}
-	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return org, err
-	}
-	err = json.Unmarshal(data, &org)
+
+	err = res.BindJSON(&org)
 	return org, err
 }
 
@@ -143,29 +110,21 @@ func (c *Client) Org(id int64) (Org, error) {
 func (c *Client) OrgByName(name string) (Org, error) {
 	org := Org{}
 
+	// the normal query escape replaces spaces with the plus symbol
+	// grafana API does not like that, use %20 instead as per API docs
 	name = url.QueryEscape(name)
 	name = strings.Replace(name, "+", "%20", -1)
-	req, err := c.newRequest("GET", fmt.Sprintf("/api/orgs/name/%s", name), nil)
-	if err != nil {
-		return org, err
-	}
-	resp, err := c.Do(req)
+
+	res, err := c.doRequest("GET", fmt.Sprintf("/api/orgs/name/%s", name), nil)
 	if err != nil {
 		return org, err
 	}
 
-	if resp.StatusCode == 404 {
-		return org, ErrNotFound // TODO: make everything like this
+	if !res.OK() {
+		return org, res.Error()
 	}
 
-	if resp.StatusCode != 200 {
-		return org, errors.New(resp.Status)
-	}
-	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return org, err
-	}
-	err = json.Unmarshal(data, &org)
+	err = res.BindJSON(&org)
 	return org, err
 }
 
@@ -173,64 +132,50 @@ func (c *Client) OrgByName(name string) (Org, error) {
 func (c *Client) Orgs() ([]Org, error) {
 	orgs := make([]Org, 0)
 
-	req, err := c.newRequest("GET", "/api/orgs/", nil)
+	res, err := c.doRequest("GET", "/api/orgs/", nil)
 	if err != nil {
 		return orgs, err
 	}
-	resp, err := c.Do(req)
-	if err != nil {
-		return orgs, err
+
+	if !res.OK() {
+		return orgs, res.Error()
 	}
-	if resp.StatusCode != 200 {
-		return orgs, errors.New(resp.Status)
-	}
-	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return orgs, err
-	}
-	err = json.Unmarshal(data, &orgs)
+
+	err = res.BindJSON(&orgs)
 	return orgs, err
 }
 
 // NewOrg creates an Org with the given name in Grafana
 func (c *Client) NewOrg(name string) (Org, error) {
 	org := Org{Name: name}
-	data, err := json.Marshal(map[string]string{"name": name})
-	req, err := c.newRequest("POST", "/api/orgs", bytes.NewBuffer(data))
+	newOrg := map[string]string{"name": name}
+	res, err := c.doJSONRequest("POST", "/api/orgs", newOrg)
 	if err != nil {
 		return org, err
 	}
-	resp, err := c.Do(req)
-	if err != nil {
-		return org, err
-	}
-	if resp.StatusCode != 200 {
-		return org, errors.New(resp.Status)
+
+	if !res.OK() {
+		return org, res.Error()
 	}
 
 	body := struct {
 		ID int64 `json:"orgId"`
 	}{0}
 
-	data, err = ioutil.ReadAll(resp.Body)
-	json.Unmarshal(data, &body)
-	org.Id = body.ID
+	err = res.BindJSON(&body)
+	if err == nil {
+		org.Id = body.ID
+	}
 
 	return org, err
 }
 
 // DeleteOrg deletes the given org ID from Grafana
 func (c *Client) DeleteOrg(id int64) error {
-	req, err := c.newRequest("DELETE", fmt.Sprintf("/api/orgs/%d", id), nil)
+	res, err := c.doRequest("DELETE", fmt.Sprintf("/api/orgs/%d", id), nil)
 	if err != nil {
 		return err
 	}
-	resp, err := c.Do(req)
-	if err != nil {
-		return err
-	}
-	if resp.StatusCode != 200 {
-		return errors.New(resp.Status)
-	}
-	return err
+
+	return res.Error()
 }

@@ -1,11 +1,7 @@
 package gapi
 
 import (
-	"bytes"
-	"encoding/json"
-	"errors"
 	"fmt"
-	"io/ioutil"
 )
 
 // AlertNotification represents a Grafana alert notification
@@ -19,101 +15,59 @@ type AlertNotification struct {
 
 // AlertNotification gets the alert with the given ID from Grafana
 func (c *Client) AlertNotification(id int64) (*AlertNotification, error) {
-	path := fmt.Sprintf("/api/alert-notifications/%d", id)
-	req, err := c.newRequest("GET", path, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := c.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode != 200 {
-		return nil, errors.New(resp.Status)
-	}
-
-	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
 	result := &AlertNotification{}
-	err = json.Unmarshal(data, &result)
+	path := fmt.Sprintf("/api/alert-notifications/%d", id)
+	res, err := c.doRequest("GET", path, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if !res.OK() {
+		return result, res.Error()
+	}
+
+	err = res.BindJSON(&result)
 	return result, err
 }
 
 // NewAlertNotification creates the given alert notification object in Grafana
 func (c *Client) NewAlertNotification(a *AlertNotification) (int64, error) {
-	data, err := json.Marshal(a)
-	if err != nil {
-		return 0, err
-	}
-	req, err := c.newRequest("POST", "/api/alert-notifications", bytes.NewBuffer(data))
+	res, err := c.doJSONRequest("POST", "/api/alert-notifications", a)
 	if err != nil {
 		return 0, err
 	}
 
-	resp, err := c.Do(req)
-	if err != nil {
-		return 0, err
-	}
-	if resp.StatusCode != 200 {
-		return 0, errors.New(resp.Status)
-	}
-
-	data, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return 0, err
+	if !res.OK() {
+		return 0, res.Error()
 	}
 
 	result := struct {
-		Id int64 `json:"id"`
+		ID int64 `json:"id"`
 	}{}
-	err = json.Unmarshal(data, &result)
-	return result.Id, err
+	err = res.BindJSON(&result)
+	return result.ID, err
 }
 
 // UpdateAlertNotification wll update the alert notification in Grafana that matches
 // the ID from the given alert notification object
 func (c *Client) UpdateAlertNotification(a *AlertNotification) error {
 	path := fmt.Sprintf("/api/alert-notifications/%d", a.Id)
-	data, err := json.Marshal(a)
-	if err != nil {
-		return err
-	}
-	req, err := c.newRequest("PUT", path, bytes.NewBuffer(data))
+	res, err := c.doJSONRequest("PUT", path, a)
 	if err != nil {
 		return err
 	}
 
-	resp, err := c.Do(req)
-	if err != nil {
-		return err
-	}
-	if resp.StatusCode != 200 {
-		return errors.New(resp.Status)
-	}
-
-	return nil
+	return res.Error()
 }
 
 // DeleteAlertNotification will delete the alert notification from Grafana
 // matching the given ID
 func (c *Client) DeleteAlertNotification(id int64) error {
 	path := fmt.Sprintf("/api/alert-notifications/%d", id)
-	req, err := c.newRequest("DELETE", path, nil)
+	res, err := c.doRequest("DELETE", path, nil)
 	if err != nil {
 		return err
 	}
 
-	resp, err := c.Do(req)
-	if err != nil {
-		return err
-	}
-	if resp.StatusCode != 200 {
-		return errors.New(resp.Status)
-	}
-
-	return nil
+	return res.Error()
 }

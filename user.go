@@ -1,11 +1,7 @@
 package gapi
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
-	"io/ioutil"
-	"log"
 	"net/url"
 
 	"github.com/grafana/grafana/pkg/api/dtos"
@@ -44,70 +40,38 @@ func (users Users) FindIndexByEmail(email string) (int, bool) {
 	return 0, false
 }
 
-func (u User) Using(c *Client, orgID int64) error {
-	req, err := c.newRequest("POST", fmt.Sprintf("/api/users/%d/using/%d", u.Id, orgID), nil)
-	if err != nil {
-		return err
-	}
-
-	req.URL.User = nil
-	resp, err := c.Do(req)
-	if err != nil {
-		return err
-	}
-	if resp.StatusCode != 200 {
-		return errors.New(resp.Status)
-	}
-
-	return nil
+func (u User) SwitchOrg(c *Client, orgID int64) error {
+	return c.SwitchUserOrg(u.Id, orgID)
 }
 
 // Users returns all the users from Grafana
 func (c *Client) Users() ([]User, error) {
 	users := make([]User, 0)
-	req, err := c.newRequest("GET", "/api/users", nil)
+	res, err := c.doRequest("GET", "/api/users", nil)
 	if err != nil {
 		return users, err
 	}
-	resp, err := c.Do(req)
-	if err != nil {
-		return users, err
+
+	if !res.OK() {
+		return users, res.Error()
 	}
-	if resp.StatusCode != 200 {
-		return users, errors.New(resp.Status)
-	}
-	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return users, err
-	}
-	err = json.Unmarshal(data, &users)
-	if err != nil {
-		return users, err
-	}
+
+	err = res.BindJSON(&users)
 	return users, err
 }
 
 func (c *Client) User(id int64) (User, error) {
 	user := User{}
-	req, err := c.newRequest("GET", fmt.Sprintf("/api/users/%d", id), nil)
+	res, err := c.doRequest("GET", fmt.Sprintf("/api/users/%d", id), nil)
 	if err != nil {
 		return user, err
 	}
-	resp, err := c.Do(req)
-	if err != nil {
-		return user, err
+
+	if !res.OK() {
+		return user, res.Error()
 	}
-	if resp.StatusCode != 200 {
-		return user, errors.New(resp.Status)
-	}
-	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return user, err
-	}
-	err = json.Unmarshal(data, &user)
-	if err != nil {
-		return user, err
-	}
+
+	err = res.BindJSON(&user)
 	user.Id = id
 	return user, err
 }
@@ -126,43 +90,22 @@ func (c *Client) NewUser(u User) error {
 
 // SwitchUserOrg will switch the current organisation (uses basic auth)
 func (c *Client) SwitchUserOrg(userID, orgID int64) error {
-	req, err := c.newRequest("POST", fmt.Sprintf("/api/users/%d/using/%d", userID, orgID), nil)
+	res, err := c.doRequest("POST", fmt.Sprintf("/api/users/%d/using/%d", userID, orgID), nil)
 	if err != nil {
 		return err
 	}
 
-	req.URL.User = nil
-	resp, err := c.Do(req)
-	data, _ := ioutil.ReadAll(resp.Body)
-	log.Println("hihiihi", string(data))
-	if err != nil {
-		return err
-	}
-	if resp.StatusCode != 200 {
-		return errors.New(resp.Status)
-	}
-
-	return nil
+	return res.Error()
 }
 
 // SwitchCurrentUserOrg will switch the current organisation of the signed in user
 func (c *Client) SwitchCurrentUserOrg(orgID int64) error {
-	req, err := c.newRequest("POST", fmt.Sprintf("/api/user/using/%d", orgID), nil)
+	res, err := c.doRequest("POST", fmt.Sprintf("/api/user/using/%d", orgID), nil)
 	if err != nil {
 		return err
 	}
 
-	req.URL.User = nil
-	resp, err := c.Do(req)
-	if err != nil {
-		return err
-	}
-
-	if resp.StatusCode != 200 {
-		return errors.New(resp.Status)
-	}
-
-	return nil
+	return res.Error()
 }
 
 // UserByEmail will find a user by their email address
@@ -172,24 +115,15 @@ func (c *Client) UserByEmail(email string) (User, error) {
 	values := url.Values{}
 	values.Set("loginOrEmail", email)
 
-	req, err := c.newRequest("GET", "/api/users/lookup?"+values.Encode(), nil)
+	res, err := c.doRequest("GET", "/api/users/lookup?"+values.Encode(), nil)
 	if err != nil {
 		return user, err
 	}
-	resp, err := c.Do(req)
-	if err != nil {
-		return user, err
+
+	if !res.OK() {
+		return user, res.Error()
 	}
-	if resp.StatusCode != 200 {
-		return user, errors.New(resp.Status)
-	}
-	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return user, err
-	}
-	err = json.Unmarshal(data, &user)
-	if err != nil {
-		return user, err
-	}
+
+	err = res.BindJSON(&user)
 	return user, err
 }

@@ -3,6 +3,7 @@ package gapi
 import (
 	"bytes"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -13,8 +14,9 @@ import (
 	"strings"
 )
 
-var ErrNotFound = errors.New("not found")
-var ErrNotImplemented = errors.New("not implemented")
+var ErrNotFound = errors.New(http.StatusText(404))
+var ErrConflict = errors.New(http.StatusText(409))
+var ErrNotImplemented = errors.New(http.StatusText(501))
 
 // Client represents a Grafana API client
 type Client struct {
@@ -50,8 +52,6 @@ func (c *Client) Do(req *http.Request) (*http.Response, error) {
 	}
 
 	logResponse(res)
-
-	c.LastStatusCode = res.StatusCode
 	return res, err
 }
 
@@ -61,6 +61,14 @@ func (c *Client) parseAuth(auth string) {
 	} else {
 		c.bearerAuth = fmt.Sprintf("Bearer %s", auth)
 	}
+}
+
+func (c *Client) jsonRequest(method, requestPath string, v interface{}) (*http.Request, error) {
+	data, err := json.Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+	return c.newRequest(method, requestPath, bytes.NewBuffer(data))
 }
 
 func (c *Client) newRequest(method, requestPath string, body io.Reader) (*http.Request, error) {
@@ -83,6 +91,24 @@ func (c *Client) newRequest(method, requestPath string, body io.Reader) (*http.R
 	logRequest(req)
 
 	return req, err
+}
+
+func (c *Client) doRequest(method, requestPath string, body io.Reader) (*Response, error) {
+	req, err := c.newRequest(method, requestPath, body)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewResponse(c.Do(req)), nil
+}
+
+func (c *Client) doJSONRequest(method, requestPath string, v interface{}) (*Response, error) {
+	req, err := c.jsonRequest(method, requestPath, v)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewResponse(c.Do(req)), nil
 }
 
 func logRequest(req *http.Request) {
@@ -121,4 +147,57 @@ func logResponse(res *http.Response) {
 	fmt.Println("")
 	fmt.Println(string(buf2.Bytes()))
 	fmt.Println("")
+}
+
+func NewResponse(res *http.Response, rerr error) *Response {
+	var data []byte
+
+	if res.Body != nil {
+		data, _ = ioutil.ReadAll(res.Body)
+	}
+
+	return &Response{
+		res,
+		data,
+		rerr,
+	}
+}
+
+type Response struct {
+	*http.Response
+	data []byte
+	err  error
+}
+
+func (res *Response) OK() bool {
+	return res.Error() == nil
+}
+
+func (res *Response) BindJSON(v interface{}) error {
+	return json.Unmarshal(res.data, v)
+}
+
+func (res *Response) Message() string {
+	data := struct {
+		Msg string `json:"message"`
+	}{}
+	res.BindJSON(&data)
+	return data.Msg
+}
+
+func (res *Response) Error() error {
+	if res.err != nil {
+		return res.err
+	}
+
+	switch res.StatusCode {
+	case 200:
+		return nil
+	case 404:
+		return ErrNotFound
+	case 409:
+		return ErrConflict
+	default:
+		return fmt.Errorf(res.Status)
+	}
 }

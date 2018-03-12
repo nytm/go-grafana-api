@@ -1,11 +1,7 @@
 package gapi
 
 import (
-	"bytes"
-	"encoding/json"
-	"errors"
 	"fmt"
-	"io/ioutil"
 )
 
 // DashboardMeta holds dashboard metadata
@@ -41,80 +37,50 @@ func (c *Client) SaveDashboard(model map[string]interface{}, overwrite bool) (*D
 		"dashboard": model,
 		"overwrite": overwrite,
 	}
-	data, err := json.Marshal(wrapper)
-	if err != nil {
-		return nil, err
-	}
-	req, err := c.newRequest("POST", "/api/dashboards/db", bytes.NewBuffer(data))
+
+	res, err := c.doJSONRequest("POST", "/api/dashboards/db", wrapper)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := c.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode != 200 {
-		return nil, errors.New(resp.Status)
-	}
-
-	data, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
+	if !res.OK() {
+		return nil, res.Error()
 	}
 
 	result := &DashboardSaveResponse{}
-	err = json.Unmarshal(data, &result)
+	err = res.BindJSON(&result)
 	return result, err
 }
 
 // Dashboard gets the dashboard with the given URI from Grafana
 func (c *Client) Dashboard(uri string) (*Dashboard, error) {
 	path := fmt.Sprintf("/api/dashboards/%s", uri)
-	req, err := c.newRequest("GET", path, nil)
+	res, err := c.doRequest("GET", path, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := c.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode != 200 {
-		return nil, errors.New(resp.Status)
-	}
-
-	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
+	if !res.OK() {
+		return nil, res.Error()
 	}
 
 	result := &Dashboard{}
-	err = json.Unmarshal(data, &result)
+	err = res.BindJSON(&result)
 	return result, err
 }
 
 func (c *Client) DashboardMetas() ([]*DashboardMeta, error) {
-	req, err := c.newRequest("GET", "/api/search", nil)
+	res, err := c.doRequest("GET", "/api/search", nil)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := c.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode != 200 {
-		return nil, errors.New(resp.Status)
-	}
-
-	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
+	if !res.OK() {
+		return nil, res.Error()
 	}
 
 	result := []*DashboardMeta{}
-	err = json.Unmarshal(data, &result)
+	err = res.BindJSON(&result)
 	return result, err
 }
 
@@ -138,20 +104,12 @@ func (c *Client) Dashboards() ([]*Dashboard, error) {
 }
 
 // DeleteDashboard will delete the dashboard with the given slug from Grafana
-func (c *Client) DeleteDashboard(slug string) error {
-	path := fmt.Sprintf("/api/dashboards/db/%s", slug)
-	req, err := c.newRequest("DELETE", path, nil)
+func (c *Client) DeleteDashboard(uri string) error {
+	path := fmt.Sprintf("/api/dashboards/%s", uri)
+	res, err := c.doRequest("DELETE", path, nil)
 	if err != nil {
 		return err
 	}
 
-	resp, err := c.Do(req)
-	if err != nil {
-		return err
-	}
-	if resp.StatusCode != 200 {
-		return errors.New(resp.Status)
-	}
-
-	return nil
+	return res.Error()
 }

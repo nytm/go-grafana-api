@@ -1,11 +1,7 @@
 package gapi
 
 import (
-	"bytes"
-	"encoding/json"
-	"errors"
 	"fmt"
-	"io/ioutil"
 )
 
 // DataSource represents a Grafana data source
@@ -46,102 +42,60 @@ type SecureJSONData struct {
 
 // NewDataSource will create the given data source in Grafana
 func (c *Client) NewDataSource(s *DataSource) (int64, error) {
-	data, err := json.Marshal(s)
-	if err != nil {
-		return 0, err
-	}
-	req, err := c.newRequest("POST", "/api/datasources", bytes.NewBuffer(data))
+	res, err := c.doJSONRequest("POST", "/api/datasources", s)
 	if err != nil {
 		return 0, err
 	}
 
-	resp, err := c.Do(req)
-	if err != nil {
-		return 0, err
-	}
-	if resp.StatusCode != 200 {
-		return 0, errors.New(resp.Status)
-	}
-
-	data, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return 0, err
+	if !res.OK() {
+		return 0, res.Error()
 	}
 
 	result := struct {
-		Id int64 `json:"id"`
+		ID int64 `json:"id"`
 	}{}
-	err = json.Unmarshal(data, &result)
-	return result.Id, err
+	err = res.BindJSON(&result)
+	return result.ID, err
 }
 
 // UpdateDataSource will update the data source in Grafana from the given
 // datasource object that matches the given datasource objects ID
 func (c *Client) UpdateDataSource(s *DataSource) error {
 	path := fmt.Sprintf("/api/datasources/%d", s.Id)
-	data, err := json.Marshal(s)
-	if err != nil {
-		return err
-	}
-	req, err := c.newRequest("PUT", path, bytes.NewBuffer(data))
+	res, err := c.doJSONRequest("PUT", path, s)
 	if err != nil {
 		return err
 	}
 
-	resp, err := c.Do(req)
-	if err != nil {
-		return err
-	}
-	if resp.StatusCode != 200 {
-		return errors.New(resp.Status)
-	}
-
-	return nil
+	return res.Error()
 }
 
 // DataSource will return the datasource with the given ID
 func (c *Client) DataSource(id int64) (*DataSource, error) {
 	path := fmt.Sprintf("/api/datasources/%d", id)
-	req, err := c.newRequest("GET", path, nil)
+	res, err := c.doRequest("GET", path, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := c.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode != 200 {
-		return nil, errors.New(resp.Status)
-	}
-
-	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
+	if !res.OK() {
+		return nil, res.Error()
 	}
 
 	result := &DataSource{}
-	err = json.Unmarshal(data, &result)
+	err = res.BindJSON(&result)
 	return result, err
 }
 
 // DeleteDataSource will delete the datasource with the given ID from Grafana
 func (c *Client) DeleteDataSource(id int64) error {
 	path := fmt.Sprintf("/api/datasources/%d", id)
-	req, err := c.newRequest("DELETE", path, nil)
+	res, err := c.doRequest("DELETE", path, nil)
 	if err != nil {
 		return err
 	}
 
-	resp, err := c.Do(req)
-	if err != nil {
-		return err
-	}
-	if resp.StatusCode != 200 {
-		return errors.New(resp.Status)
-	}
-
-	return nil
+	return res.Error()
 }
 
 // DataSourcesByOrgId will return the datasources for the given org ID
@@ -164,25 +118,12 @@ func (c *Client) DataSourcesByOrgId(id int64) ([]*DataSource, error) {
 // DataSources will return all the datasources from Grafana
 func (c *Client) DataSources() ([]*DataSource, error) {
 	path := "/api/datasources"
-	req, err := c.newRequest("GET", path, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := c.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode != 200 {
-		return nil, errors.New(resp.Status)
-	}
-
-	data, err := ioutil.ReadAll(resp.Body)
+	res, err := c.doRequest("GET", path, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	result := []*DataSource{}
-	err = json.Unmarshal(data, &result)
+	err = res.BindJSON(&result)
 	return result, err
 }
