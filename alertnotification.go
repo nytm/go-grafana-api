@@ -6,7 +6,7 @@ import (
 
 // AlertNotification represents a Grafana alert notification
 type AlertNotification struct {
-	Id        int64       `json:"id,omitempty"`
+	ID        int64       `json:"id,omitempty"`
 	Name      string      `json:"name"`
 	Type      string      `json:"type"`
 	IsDefault bool        `json:"isDefault"`
@@ -51,7 +51,7 @@ func (c *Client) NewAlertNotification(a *AlertNotification) (int64, error) {
 // UpdateAlertNotification wll update the alert notification in Grafana that matches
 // the ID from the given alert notification object
 func (c *Client) UpdateAlertNotification(a *AlertNotification) error {
-	path := fmt.Sprintf("/api/alert-notifications/%d", a.Id)
+	path := fmt.Sprintf("/api/alert-notifications/%d", a.ID)
 	res, err := c.doJSONRequest("PUT", path, a)
 	if err != nil {
 		return err

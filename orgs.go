@@ -36,7 +36,7 @@ func (ousers OrgUsers) Users() []User {
 
 // Org represents an Organisation object in Grafana
 type Org struct {
-	Id   int64  `json:"id"`
+	ID   int64  `json:"id"`
 	Name string `json:"name"`
 }
 
@@ -47,7 +47,7 @@ func (o Org) String() string {
 // DataSources use the given client to return the datasources
 // for the organisation
 func (o Org) DataSources(c *Client) ([]*DataSource, error) {
-	return c.DataSourcesByOrgId(o.Id)
+	return c.DataSourcesByOrgID(o.ID)
 }
 
 // AddUser will add a user to the organisation
@@ -59,7 +59,7 @@ func (o Org) AddUser(c *Client, username, role string) error {
 
 	acl := map[string]string{"role": role, "loginOrEmail": username}
 
-	res, err := c.doJSONRequest("POST", fmt.Sprintf("/api/orgs/%d/users", o.Id), acl)
+	res, err := c.doJSONRequest("POST", fmt.Sprintf("/api/orgs/%d/users", o.ID), acl)
 	if err != nil {
 		return err
 	}
@@ -72,7 +72,7 @@ func (o Org) AddUser(c *Client, username, role string) error {
 func (o Org) Users(c *Client) ([]OrgUser, error) {
 	ousers := []OrgUser{}
 
-	res, err := c.doRequest("GET", fmt.Sprintf("/api/orgs/%d/users", o.Id), nil)
+	res, err := c.doRequest("GET", fmt.Sprintf("/api/orgs/%d/users", o.ID), nil)
 	if err != nil {
 		return ousers, err
 	}
@@ -87,7 +87,7 @@ func (o Org) Users(c *Client) ([]OrgUser, error) {
 
 // RemoveUser removes the user from the organisation
 func (o Org) RemoveUser(c *Client, userID int64) error {
-	res, err := c.doRequest("DELETE", fmt.Sprintf("/api/orgs/%d/users/%d", o.Id, userID), nil)
+	res, err := c.doRequest("DELETE", fmt.Sprintf("/api/orgs/%d/users/%d", o.ID, userID), nil)
 	if err != nil {
 		return err
 	}
@@ -170,7 +170,7 @@ func (c *Client) NewOrg(name string) (Org, error) {
 
 	err = res.BindJSON(&body)
 	if err == nil {
-		org.Id = body.ID
+		org.ID = body.ID
 	}
 
 	return org, err

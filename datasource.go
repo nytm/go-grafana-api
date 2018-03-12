@@ -6,7 +6,7 @@ import (
 
 // DataSource represents a Grafana data source
 type DataSource struct {
-	Id     int64  `json:"id,omitempty"`
+	ID     int64  `json:"id,omitempty"`
 	Name   string `json:"name"`
 	Type   string `json:"type"`
 	URL    string `json:"url"`
@@ -16,7 +16,7 @@ type DataSource struct {
 	User     string `json:"user,omitempty"`
 	Password string `json:"password,omitempty"`
 
-	OrgId     int64 `json:"orgId,omitempty"`
+	OrgID     int64 `json:"orgId,omitempty"`
 	IsDefault bool  `json:"isDefault"`
 
 	BasicAuth         bool   `json:"basicAuth"`
@@ -61,7 +61,7 @@ func (c *Client) NewDataSource(s *DataSource) (int64, error) {
 // UpdateDataSource will update the data source in Grafana from the given
 // datasource object that matches the given datasource objects ID
 func (c *Client) UpdateDataSource(s *DataSource) error {
-	path := fmt.Sprintf("/api/datasources/%d", s.Id)
+	path := fmt.Sprintf("/api/datasources/%d", s.ID)
 	res, err := c.doJSONRequest("PUT", path, s)
 	if err != nil {
 		return err
@@ -98,8 +98,8 @@ func (c *Client) DeleteDataSource(id int64) error {
 	return res.Error()
 }
 
-// DataSourcesByOrgId will return the datasources for the given org ID
-func (c *Client) DataSourcesByOrgId(id int64) ([]*DataSource, error) {
+// DataSourcesByOrgID will return the datasources for the given org ID
+func (c *Client) DataSourcesByOrgID(id int64) ([]*DataSource, error) {
 	out := []*DataSource{}
 	dss, err := c.DataSources()
 	if err != nil {
@@ -107,7 +107,7 @@ func (c *Client) DataSourcesByOrgId(id int64) ([]*DataSource, error) {
 	}
 
 	for _, ds := range dss {
-		if ds.OrgId == id {
+		if ds.OrgID == id {
 			out = append(out, ds)
 		}
 	}

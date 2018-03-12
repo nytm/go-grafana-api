@@ -9,11 +9,11 @@ import (
 
 // User represents a Grafana user
 type User struct {
-	Id       int64  `json:"id"`
+	ID       int64  `json:"id"`
 	Email    string `json:"email"`
 	Name     string `json:"name"`
 	Login    string `json:"login"`
-	OrgId    string `json:"org_id"`
+	OrgID    string `json:"org_id"`
 	IsAdmin  bool   `json:"isGrafanaAdmin"` // TODO: handle isAdmin returned from /api/users
 	Password string `json:"password,omitempty"`
 }
@@ -46,7 +46,7 @@ func (users Users) FindIndexByEmail(email string) (int, bool) {
 
 // SwitchOrg will change the current org context for the user
 func (u User) SwitchOrg(c *Client, orgID int64) error {
-	return c.SwitchUserOrg(u.Id, orgID)
+	return c.SwitchUserOrg(u.ID, orgID)
 }
 
 // Users returns all the users from Grafana
@@ -78,7 +78,7 @@ func (c *Client) User(id int64) (User, error) {
 	}
 
 	err = res.BindJSON(&user)
-	user.Id = id
+	user.ID = id
 	return user, err
 }
 
