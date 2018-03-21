@@ -52,8 +52,9 @@ func (o Org) DataSources(c *Client) ([]*DataSource, error) {
 
 // AddUser will add a user to the organisation
 func (o Org) AddUser(c *Client, username, role string) error {
-	validRole := role == OrgUserRoleAdmin || role == OrgUserRoleEditor || role == OrgUserRoleViewer
-	if !validRole {
+	role = AutoFixRole(role)
+
+	if !UserRoleIsValid(role) {
 		return fmt.Errorf("invalid role name: %s", role)
 	}
 
@@ -184,4 +185,28 @@ func (c *Client) DeleteOrg(id int64) error {
 	}
 
 	return res.Error()
+}
+
+// UserRoleIsValid will return true if the given role is valid
+func UserRoleIsValid(role string) bool {
+	switch role {
+	case OrgUserRoleAdmin:
+		fallthrough
+	case OrgUserRoleEditor:
+		fallthrough
+	case OrgUserRoleViewer:
+		return true
+	}
+
+	return false
+}
+
+func AutoFixRole(role string) string {
+	role = strings.Title(role)
+
+	if role == "Veiwer" {
+		role = OrgUserRoleViewer
+	}
+
+	return role
 }
