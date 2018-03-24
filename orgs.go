@@ -44,9 +44,13 @@ func (o Org) String() string {
 	return o.Name
 }
 
+type OrgDataSourceGetter interface {
+	DataSourcesByOrgID(int64) ([]*DataSource, error)
+}
+
 // DataSources use the given client to return the datasources
 // for the organisation
-func (o Org) DataSources(c *Client) ([]*DataSource, error) {
+func (o Org) DataSources(c OrgDataSourceGetter) ([]*DataSource, error) {
 	return c.DataSourcesByOrgID(o.ID)
 }
 
