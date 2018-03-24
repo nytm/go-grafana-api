@@ -4,6 +4,49 @@ import (
 	"fmt"
 )
 
+// Tags represents a set of tags
+type Tags map[string]bool
+
+// NewTags creates a new Tags object from the given string slice
+func NewTags(tagslice []string) Tags {
+	tags := Tags{}
+	tags.Set(tagslice...)
+	return tags
+}
+
+// Add will add the given tags to the Tag list
+func (t Tags) Add(tags ...string) {
+	for _, tag := range tags {
+		t[tag] = true
+	}
+}
+
+// Remove will remote the given tags to the Tag list
+func (t Tags) Remove(tags ...string) {
+	for _, tag := range tags {
+		delete(t, tag)
+	}
+}
+
+// Set will delete all existing tags, and add the given tags
+func (t Tags) Set(tags ...string) {
+	for tag := range t {
+		delete(t, tag)
+	}
+
+	t.Add(tags...)
+}
+
+// Strings will give back the tags as a string slice
+func (t Tags) Strings() []string {
+	tags := []string{}
+	for tag := range t {
+		tags = append(tags, tag)
+	}
+
+	return tags
+}
+
 // DashboardMeta holds dashboard metadata
 type DashboardMeta struct {
 	IsStarred bool     `json:"isStarred"`
@@ -29,6 +72,65 @@ type DashboardSaveResponse struct {
 type Dashboard struct {
 	Meta  DashboardMeta          `json:"meta"`
 	Model map[string]interface{} `json:"dashboard"`
+}
+
+// NewDashboard creates a new blank dashboard
+func NewDashboard() *Dashboard {
+	return &Dashboard{Meta: DashboardMeta{}, Model: map[string]interface{}{}}
+}
+
+// Title returns the title of the dashboard
+func (d Dashboard) Title() (string, bool) {
+	ititle, found := d.Model["title"]
+	if !found {
+		return "", false
+	}
+
+	title, ok := ititle.(string)
+	return title, ok
+}
+
+// Tags returns the tags for the dashboard
+func (d *Dashboard) Tags() []string {
+	itagslice, found := d.Model["tags"]
+	if !found {
+		return []string{}
+	}
+
+	tagslice, ok := itagslice.([]string)
+	if !ok {
+		return []string{}
+	}
+
+	return tagslice
+}
+
+// AddTags will add the given tags to the dashboard
+func (d *Dashboard) AddTags(newtags ...string) {
+	tags := NewTags(d.Tags())
+
+	for _, tag := range newtags {
+		tags[tag] = true
+	}
+
+	d.Model["tags"] = tags.Strings()
+}
+
+// RemoveTags will remove the given tags to the dashboard
+func (d *Dashboard) RemoveTags(deltags ...string) {
+	tags := NewTags(d.Tags())
+
+	for _, tag := range deltags {
+		delete(tags, tag)
+	}
+
+	d.Model["tags"] = tags.Strings()
+}
+
+// SetTags will set the given tags on the dashboard (deleting all others)
+func (d *Dashboard) SetTags(newtags ...string) {
+	tags := NewTags(newtags)
+	d.Model["tags"] = tags.Strings()
 }
 
 // SaveDashboard saves the given dashboard model to the API

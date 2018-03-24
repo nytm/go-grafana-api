@@ -30,7 +30,7 @@ func gapiTestTools(code int, body string) (*httptest.Server, *Client) {
 		Host:   "my-grafana.com",
 	}
 
-	client := &Client{"my-key", url, httpClient}
+	client := &Client{"", "my-key", url.String(), 0, httpClient}
 
 	return server, client
 }

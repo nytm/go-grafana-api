@@ -137,6 +137,17 @@ func (c *Client) SwitchCurrentUserOrg(orgID int64) error {
 	return res.Error()
 }
 
+// SetUserAdmin will set the given user ID as an admin
+func (c *Client) SetUserAdmin(id int64, admin bool) error {
+	body := map[string]bool{"isGrafanaAdmin": admin}
+	res, err := c.doJSONRequest("PUT", fmt.Sprintf("/api/admin/users/%d/permissions", id), body)
+	if err != nil {
+		return err
+	}
+
+	return res.Error()
+}
+
 // UserByEmail will find a user by their email address
 func (c *Client) UserByEmail(email string) (*User, error) {
 	user := &User{}

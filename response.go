@@ -11,7 +11,7 @@ import (
 func NewResponse(res *http.Response, rerr error) *Response {
 	var data []byte
 
-	if res.Body != nil {
+	if rerr == nil && res.Body != nil {
 		data, _ = ioutil.ReadAll(res.Body)
 	}
 
