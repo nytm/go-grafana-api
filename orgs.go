@@ -67,8 +67,8 @@ func (o Org) DataSources(c OrgDataSourceGetter) ([]*DataSource, error) {
 func (o Org) AddUser(c *Client, username, role string) error {
 	role = AutoFixRole(role)
 
-	if !UserRoleIsValid(role) {
-		return fmt.Errorf("invalid role name: %s", role)
+	if !IsUserRoleValid(role) {
+		return ErrInvalidUserRole
 	}
 
 	acl := map[string]string{"role": role, "loginOrEmail": username}
@@ -233,6 +233,9 @@ func IsUserRoleValid(role string) bool {
 	return false
 }
 
+// AutoFixRole will attempt to automatically fix common
+// issues when setting user roles using strings.  It will
+// titleize and correct the miss-spelling of viewer
 func AutoFixRole(role string) string {
 	role = strings.Title(role)
 
