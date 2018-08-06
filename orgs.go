@@ -21,8 +21,10 @@ var ErrInvalidUserRole = fmt.Errorf("invalid user role")
 // OrgUser is a user of the org
 type OrgUser struct {
 	User
+	ID    int64  `json:"userId"`
 	Role  string `json:"role"`
-	OrgID int64  `json:"org_id"`
+	OrgID int64  `json:"orgId"`
+}
 
 // UpdateRole will update the role of the org user to the one given
 func (ouser OrgUser) UpdateRole(c *Client, role string) error {
