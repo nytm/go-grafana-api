@@ -79,7 +79,7 @@ func (c *Client) jsonRequest(method, requestPath string, v interface{}) (*http.R
 	if err != nil {
 		return nil, err
 	}
-	return c.newRequest(method, requestPath, bytes.NewBuffer(data))
+	return c.newRequest(method, requestPath, bytes.NewReader(data))
 }
 
 func (c *Client) newRequest(method, requestPath string, body io.Reader) (*http.Request, error) {
@@ -132,6 +132,7 @@ func logRequest(req *http.Request) {
 
 	if req.Body != nil {
 		data, _ := ioutil.ReadAll(req.Body)
+		req.Body = ioutil.NopCloser(bytes.NewReader(data))
 		fmt.Println(string(data))
 	}
 
