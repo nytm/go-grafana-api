@@ -181,9 +181,14 @@ func (c *Client) User(id int64) (*User, error) {
 	return user, err
 }
 
-// NewUser creates a new user by wrapping the CreateUserForm method to
-// avoiding requiring a dependency on Grafana code in your code
+// NewUser is DEPRECATED
 func (c *Client) NewUser(u User) error {
+	return c.CreateUser(u)
+}
+
+// CreateUser creates a new user by wrapping the CreateUserForm method to
+// avoiding requiring a dependency on Grafana code in your code
+func (c *Client) CreateUser(u User) error {
 	form := dtos.AdminCreateUserForm{}
 	form.Password = u.Password
 	form.Email = u.Email
@@ -191,6 +196,15 @@ func (c *Client) NewUser(u User) error {
 	form.Login = u.Login
 
 	return c.CreateUserForm(form)
+}
+
+func (c *Client) SaveUser(u *User) error {
+	res, err := c.doRequest("PUT", fmt.Sprintf("/api/users/%d", u.ID), nil)
+	if err != nil {
+		return err
+	}
+
+	return res.Error()
 }
 
 // SwitchUserOrg will switch the current organisation (uses basic auth)
