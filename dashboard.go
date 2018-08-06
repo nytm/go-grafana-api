@@ -97,9 +97,9 @@ func (d *Dashboard) Tags() []string {
 		return []string{}
 	}
 
-	tagslice, ok := itagslice.([]string)
-	if !ok {
-		return []string{}
+	tagslice := []string{}
+	for _, s := range itagslice.([]interface{}) {
+		tagslice = append(tagslice, s.(string))
 	}
 
 	return tagslice
