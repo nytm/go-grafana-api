@@ -13,6 +13,22 @@ type AlertNotification struct {
 	Settings  interface{} `json:"settings"`
 }
 
+// AlertNotifications returns all notifications for the actual/current org
+func (c *Client) AlertNotifications() ([]*AlertNotification, error) {
+	result := []*AlertNotification{}
+	res, err := c.doRequest("GET", "/api/alert-notifications", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if !res.OK() {
+		return result, res.Error()
+	}
+
+	err = res.BindJSON(&result)
+	return result, err
+}
+
 // AlertNotification gets the alert with the given ID from Grafana
 func (c *Client) AlertNotification(id int64) (*AlertNotification, error) {
 	result := &AlertNotification{}
