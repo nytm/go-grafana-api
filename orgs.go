@@ -43,6 +43,18 @@ func (ousers OrgUsers) Users() []*User {
 	return users
 }
 
+// FindByLogin returns the org user with the given email from a
+// collection of org users, and a false if it was not found
+func (ousers OrgUsers) FindByLogin(login string) (*OrgUser, bool) {
+	for _, u := range ousers {
+		if u.Login == login {
+			return u, true
+		}
+	}
+
+	return &OrgUser{}, false
+}
+
 // Org represents an Organisation object in Grafana
 type Org struct {
 	ID   int64  `json:"id"`
