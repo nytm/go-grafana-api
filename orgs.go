@@ -15,11 +15,18 @@ const (
 	OrgUserRoleEditor = "Editor"
 )
 
+// ErrInvalidUserRole will be returned when a org user role is unknown
+var ErrInvalidUserRole = fmt.Errorf("invalid user role")
+
 // OrgUser is a user of the org
 type OrgUser struct {
 	User
 	Role  string `json:"role"`
 	OrgID int64  `json:"org_id"`
+
+// UpdateRole will update the role of the org user to the one given
+func (ouser OrgUser) UpdateRole(c *Client, role string) error {
+	return c.UpdateOrgUserRole(ouser.OrgID, ouser.ID, role)
 }
 
 // OrgUsers is a collection of Org user models
@@ -181,6 +188,22 @@ func (c *Client) NewOrg(name string) (Org, error) {
 	return org, err
 }
 
+// UpdateOrgUserRole will update the role for the given user on the given org
+func (c *Client) UpdateOrgUserRole(orgID, userID int64, role string) error {
+	role = AutoFixRole(role)
+	if !IsUserRoleValid(role) {
+		return ErrInvalidUserRole
+	}
+
+	path := fmt.Sprintf("/api/orgs/%d/users/%d", orgID, userID)
+	res, err := c.doJSONRequest("PATCH", path, map[string]string{"role": role})
+	if err != nil {
+		return err
+	}
+
+	return res.Error()
+}
+
 // DeleteOrg deletes the given org ID from Grafana
 func (c *Client) DeleteOrg(id int64) error {
 	res, err := c.doRequest("DELETE", fmt.Sprintf("/api/orgs/%d", id), nil)
@@ -191,8 +214,11 @@ func (c *Client) DeleteOrg(id int64) error {
 	return res.Error()
 }
 
-// UserRoleIsValid will return true if the given role is valid
-func UserRoleIsValid(role string) bool {
+// UserRoleIsValid is deprecated in preference to IsUserRoleValid
+var UserRoleIsValid = IsUserRoleValid
+
+// IsUserRoleValid will return true if the given role is valid
+func IsUserRoleValid(role string) bool {
 	switch role {
 	case OrgUserRoleAdmin:
 		fallthrough
