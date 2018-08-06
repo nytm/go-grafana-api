@@ -6,11 +6,12 @@ import (
 
 // DataSource represents a Grafana data source
 type DataSource struct {
-	ID     int64  `json:"id,omitempty"`
-	Name   string `json:"name"`
-	Type   string `json:"type"`
-	URL    string `json:"url"`
-	Access string `json:"access"`
+	ID          int64  `json:"id,omitempty"`
+	Name        string `json:"name"`
+	Type        string `json:"type"`
+	TypeLogoURL string `json:"typeLogoUrl"`
+	URL         string `json:"url"`
+	Access      string `json:"access"`
 
 	Database string `json:"database,omitempty"`
 	User     string `json:"user,omitempty"`
