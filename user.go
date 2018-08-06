@@ -72,6 +72,82 @@ func (u User) SwitchOrg(c *Client, orgID int64) error {
 	return c.SwitchUserOrg(u.ID, orgID)
 }
 
+// MakeGlobalAdmin assigns the user to all orgs with an Admin role
+func (u User) MakeGlobalAdmin(c *Client) error {
+	return u.AddToAllOrgs(c, OrgUserRoleAdmin)
+}
+
+// MakeGlobalEditor assigns the user to all orgs with a Editor role
+func (u User) MakeGlobalEditor(c *Client) error {
+	return u.AddToAllOrgs(c, OrgUserRoleEditor)
+}
+
+// MakeGlobalViewer assigns the user to all orgs with a Viewer role
+func (u User) MakeGlobalViewer(c *Client) error {
+	return u.AddToAllOrgs(c, OrgUserRoleViewer)
+}
+
+// RemoveFromAllOrgs will remove the user from all the orgs that they
+// have a current role in
+func (u User) RemoveFromAllOrgs(c *Client) error {
+	orgs, err := c.Orgs()
+	if err != nil {
+		return err
+	}
+
+	for _, org := range orgs {
+		ousers, err := org.Users(c)
+		if err != nil {
+			return err
+		}
+
+		u, ok := OrgUsers(ousers).FindByLogin(u.Login)
+		if !ok {
+			continue
+		}
+
+		if err := org.RemoveUser(c, u.ID); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// AddToAllOrgs will add the user to all orgs with the given role
+func (u User) AddToAllOrgs(c *Client, role string) error {
+	orgs, err := c.Orgs()
+	if err != nil {
+		return err
+	}
+
+	for _, org := range orgs {
+		err := org.AddUser(c, u.Login, role)
+
+		if err != nil && err != ErrConflict {
+			return err
+		}
+
+		if err != nil && err == ErrConflict {
+			ousers, err := org.Users(c)
+			if err != nil {
+				return err
+			}
+
+			ouser, ok := OrgUsers(ousers).FindByLogin(u.Login)
+			if !ok {
+				return fmt.Errorf("Conflict occured while assigning %s to %s, but user is not found in that org", u.Login, org.Name)
+			}
+
+			if err := ouser.UpdateRole(c, role); err != nil {
+				return fmt.Errorf("unable to update role for %s on %s: %s", u.Login, org.Name, err)
+			}
+		}
+	}
+
+	return nil
+}
+
 // Users returns all the users from Grafana
 func (c *Client) Users() ([]*User, error) {
 	users := make([]*User, 0)
