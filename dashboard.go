@@ -98,8 +98,13 @@ func (d *Dashboard) Tags() []string {
 	}
 
 	tagslice := []string{}
-	for _, s := range itagslice.([]interface{}) {
-		tagslice = append(tagslice, s.(string))
+	switch slice := itagslice.(type) {
+	case []interface{}:
+		for _, s := range slice {
+			tagslice = append(tagslice, s.(string))
+		}
+	case []string:
+		tagslice = slice
 	}
 
 	return tagslice
