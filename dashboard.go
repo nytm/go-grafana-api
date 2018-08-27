@@ -3,9 +3,11 @@ package gapi
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
+
 	"fmt"
 	"io/ioutil"
+
+	"github.com/pkg/errors"
 )
 
 type DashboardMeta struct {
@@ -31,7 +33,7 @@ func (c *Client) SaveDashboard(model map[string]interface{}, overwrite bool) (*D
 	}
 	data, err := json.Marshal(wrapper)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Failed to marshall dashboard JSON")
 	}
 	req, err := c.newRequest("POST", "/api/dashboards/db", nil, bytes.NewBuffer(data))
 	if err != nil {
@@ -40,10 +42,14 @@ func (c *Client) SaveDashboard(model map[string]interface{}, overwrite bool) (*D
 
 	resp, err := c.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Unable to perform HTTP request")
 	}
+
 	if resp.StatusCode != 200 {
-		return nil, errors.New(resp.Status)
+		var gmsg GrafanaErrorMessage
+		dec := json.NewDecoder(resp.Body)
+		dec.Decode(&gmsg)
+		return nil, fmt.Errorf("Request to Grafana returned %+v status code with the following message: %+v", resp.StatusCode, gmsg.Message)
 	}
 
 	data, err = ioutil.ReadAll(resp.Body)
@@ -93,7 +99,10 @@ func (c *Client) DeleteDashboard(slug string) error {
 		return err
 	}
 	if resp.StatusCode != 200 {
-		return errors.New(resp.Status)
+		var gmsg GrafanaErrorMessage
+		dec := json.NewDecoder(resp.Body)
+		dec.Decode(&gmsg)
+		return fmt.Errorf("Request to Grafana returned %+v status code with the following message: %+v", resp.StatusCode, gmsg.Message)
 	}
 
 	return nil
