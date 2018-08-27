@@ -2,12 +2,18 @@ package gapi
 
 import (
 	"fmt"
-
-	"github.com/grafana/grafana/pkg/api/dtos"
 )
 
+// AdminCreateUserForm is used to create a new user
+type AdminCreateUserForm struct {
+	Email    string `json:"email"`
+	Login    string `json:"login"`
+	Name     string `json:"name"`
+	Password string `json:"password" binding:"Required"`
+}
+
 // CreateUserForm will create a user from the given form
-func (c *Client) CreateUserForm(settings dtos.AdminCreateUserForm) error {
+func (c *Client) CreateUserForm(settings AdminCreateUserForm) error {
 	res, err := c.doJSONRequest("POST", "/api/admin/users", settings)
 	if err != nil {
 		return err

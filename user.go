@@ -3,8 +3,6 @@ package gapi
 import (
 	"fmt"
 	"net/url"
-
-	"github.com/grafana/grafana/pkg/api/dtos"
 )
 
 // User represents a Grafana user
@@ -189,7 +187,7 @@ func (c *Client) NewUser(u User) error {
 // CreateUser creates a new user by wrapping the CreateUserForm method to
 // avoiding requiring a dependency on Grafana code in your code
 func (c *Client) CreateUser(u User) error {
-	form := dtos.AdminCreateUserForm{}
+	form := AdminCreateUserForm{}
 	form.Password = u.Password
 	form.Email = u.Email
 	form.Name = u.Name
