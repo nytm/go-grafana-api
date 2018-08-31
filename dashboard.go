@@ -26,10 +26,11 @@ type Dashboard struct {
 	Model map[string]interface{} `json:"dashboard"`
 }
 
-func (c *Client) SaveDashboard(model map[string]interface{}, overwrite bool) (*DashboardSaveResponse, error) {
+func (c *Client) SaveDashboard(model map[string]interface{}, overwrite bool, folderId int) (*DashboardSaveResponse, error) {
 	wrapper := map[string]interface{}{
 		"dashboard": model,
 		"overwrite": overwrite,
+		"folderId":  folderId,
 	}
 	data, err := json.Marshal(wrapper)
 	if err != nil {
