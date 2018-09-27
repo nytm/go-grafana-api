@@ -65,6 +65,7 @@ func (o Org) String() string {
 	return o.Name
 }
 
+// OrgDataSourceGetter allows getting datasources using an org ID
 type OrgDataSourceGetter interface {
 	DataSourcesByOrgID(int64) ([]*DataSource, error)
 }

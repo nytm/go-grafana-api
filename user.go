@@ -196,6 +196,7 @@ func (c *Client) CreateUser(u User) error {
 	return c.CreateUserForm(form)
 }
 
+// SaveUser will save the given user to the API
 func (c *Client) SaveUser(u *User) error {
 	res, err := c.doRequest("PUT", fmt.Sprintf("/api/users/%d", u.ID), nil)
 	if err != nil {
