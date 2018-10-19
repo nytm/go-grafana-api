@@ -216,6 +216,22 @@ func (c *Client) SwitchUserOrg(userID, orgID int64) error {
 	return res.Error()
 }
 
+// ActualUser will return the actual user that is logged into the API
+func (c *Client) ActualUser() (*User, error) {
+	user := &User{}
+	res, err := c.doRequest("GET", "/api/user", nil)
+	if err != nil {
+		return user, err
+	}
+
+	if !res.OK() {
+		return user, res.Error()
+	}
+
+	err = res.BindJSON(&user)
+	return user, err
+}
+
 // SwitchCurrentUserOrg will switch the current organisation of the signed in user
 func (c *Client) SwitchCurrentUserOrg(orgID int64) error {
 	res, err := c.doRequest("POST", fmt.Sprintf("/api/user/using/%d", orgID), nil)
