@@ -11,7 +11,7 @@ type User struct {
 	Email    string `json:"email"`
 	Name     string `json:"name"`
 	Login    string `json:"login"`
-	OrgID    string `json:"org_id"`
+	OrgID    int64  `json:"orgId"`
 	IsAdmin  bool   `json:"isGrafanaAdmin"` // TODO: handle isAdmin returned from /api/users
 	Password string `json:"password,omitempty"`
 }

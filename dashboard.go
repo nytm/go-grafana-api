@@ -160,8 +160,8 @@ func (c *Client) SaveDashboard(model map[string]interface{}, overwrite bool) (*D
 }
 
 // Dashboard gets the dashboard with the given URI from Grafana
-func (c *Client) Dashboard(uri string) (*Dashboard, error) {
-	path := fmt.Sprintf("/api/dashboards/%s", uri)
+func (c *Client) Dashboard(slug string) (*Dashboard, error) {
+	path := fmt.Sprintf("/api/dashboards/%s", slug)
 	res, err := c.doRequest("GET", path, nil)
 	if err != nil {
 		return nil, err
@@ -216,7 +216,7 @@ func (c *Client) Dashboards() ([]*Dashboard, error) {
 
 // DeleteDashboard will delete the dashboard with the given slug from Grafana
 func (c *Client) DeleteDashboard(uri string) error {
-	path := fmt.Sprintf("/api/dashboards/%s", uri)
+	path := fmt.Sprintf("/api/dashboards/db/%s", uri)
 	res, err := c.doRequest("DELETE", path, nil)
 	if err != nil {
 		return err
