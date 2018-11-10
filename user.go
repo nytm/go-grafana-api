@@ -206,7 +206,8 @@ func (c *Client) SaveUser(u *User) error {
 	return res.Error()
 }
 
-// SwitchUserOrg will switch the current organisation (uses basic auth)
+// SwitchUserOrg will switch the current organisation of the given user ID (via basic auth) to
+// the given organisation ID
 func (c *Client) SwitchUserOrg(userID, orgID int64) error {
 	res, err := c.doRequest("POST", fmt.Sprintf("/api/users/%d/using/%d", userID, orgID), nil)
 	if err != nil {

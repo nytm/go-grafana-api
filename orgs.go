@@ -122,6 +122,21 @@ func (o Org) RemoveUser(c *Client, userID int64) error {
 	return res.Error()
 }
 
+// SetHomeDashboard will set the home dashboard of the organisation
+func (o Org) SetHomeDashboard(c *Client, dashID int64) error {
+	if err := c.SwitchCurrentUserOrg(o.ID); err != nil {
+		return err
+	}
+
+	prefs, err := c.GetCurrentOrgPrefs()
+	if err != nil {
+		return err
+	}
+
+	prefs.HomeDashboardID = dashID
+	return c.UpdateCurrentOrgPrefs(prefs)
+}
+
 // Org returns the organisation with the given ID
 func (c *Client) Org(id int64) (Org, error) {
 	org := Org{}
@@ -257,4 +272,43 @@ func AutoFixRole(role string) string {
 	}
 
 	return role
+}
+
+// OrgPrefs represents the organisation preferences
+type OrgPrefs struct {
+	Theme           string `json:"theme"`
+	HomeDashboardID int64  `json:"homeDashboardId"`
+	Timezone        string `json:"timezone"`
+}
+
+// GetCurrentOrgPrefs will get the preferences for the organisation in the current
+// context, as selected by the SwitchContext method
+func (c *Client) GetCurrentOrgPrefs() (*OrgPrefs, error) {
+	prefs := &OrgPrefs{}
+
+	res, err := c.doRequest("GET", "/api/org/preferences", nil)
+	if err != nil {
+		return prefs, err
+	}
+
+	if !res.OK() {
+		return prefs, res.Error()
+	}
+
+	if err := res.BindJSON(prefs); err != nil {
+		return prefs, err
+	}
+
+	return prefs, nil
+}
+
+// UpdateCurrentOrgPrefs will update the preferences of the organisation in the current
+// context, as selected by the SwitchContext method
+func (c *Client) UpdateCurrentOrgPrefs(prefs *OrgPrefs) error {
+	res, err := c.doJSONRequest("PUT", "/api/org/preferences", prefs)
+	if err != nil {
+		return err
+	}
+
+	return res.Error()
 }
