@@ -2,6 +2,8 @@ package gapi
 
 import (
 	"fmt"
+	"net/url"
+	"strings"
 )
 
 // Tags represents a set of tags
@@ -185,7 +187,33 @@ func (c *Client) Dashboard(slug string) (*Dashboard, error) {
 // organisation context.  These can then be used to get specific
 // dashboards
 func (c *Client) DashboardMetas() ([]*DashboardMeta, error) {
-	res, err := c.doRequest("GET", "/api/search", nil)
+	return c.SearchDashboards("", "", false)
+}
+
+// SearchDashboards allows to search via query, tag or starred dashboards
+func (c *Client) SearchDashboards(query string, tag string, starred bool) ([]*DashboardMeta, error) {
+	vals := new(url.Values)
+	if tag != "" {
+		vals.Set("tag", tag)
+	}
+
+	if query != "" {
+		vals.Set("query", query)
+	}
+
+	if starred {
+		vals.Set("starred", "true")
+	}
+
+	q := vals.Encode()
+	q = strings.Replace(q, "+", "%20", -1)
+
+	uri := "/api/search"
+	if q != "" {
+		uri += "?" + q
+	}
+
+	res, err := c.doRequest("GET", uri, nil)
 	if err != nil {
 		return nil, err
 	}
