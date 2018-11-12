@@ -1,6 +1,6 @@
 # Golang Grafana API
 
-Grafana HTTP API Client for Go
+Grafana HTTP API Client for Golang.  Based of the 4.6 version of the API: http://docs.grafana.org/v4.6/http_api
 
 ## Installation
 
