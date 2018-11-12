@@ -52,11 +52,16 @@ func (t Tags) Strings() []string {
 // DashboardMeta holds dashboard metadata
 type DashboardMeta struct {
 	IsStarred bool     `json:"isStarred"`
+	ID        int64    `json:"id"`
 	Slug      string   `json:"slug"`
 	Title     string   `json:"title"`
 	URI       string   `json:"uri"`
 	Type      string   `json:"type"`
 	Tags      []string `json:"tags"`
+}
+
+func (meta *DashboardMeta) SetSlug() {
+	meta.Slug = strings.Split(meta.URI, "/")[1]
 }
 
 // DashboardSaveResponse represents the response from the API when
@@ -192,7 +197,7 @@ func (c *Client) DashboardMetas() ([]*DashboardMeta, error) {
 
 // SearchDashboards allows to search via query, tag or starred dashboards
 func (c *Client) SearchDashboards(query string, tag string, starred bool) ([]*DashboardMeta, error) {
-	vals := new(url.Values)
+	vals := make(url.Values)
 	if tag != "" {
 		vals.Set("tag", tag)
 	}
@@ -224,6 +229,9 @@ func (c *Client) SearchDashboards(query string, tag string, starred bool) ([]*Da
 
 	result := []*DashboardMeta{}
 	err = res.BindJSON(&result)
+	for _, meta := range result {
+		meta.SetSlug()
+	}
 	return result, err
 }
 
