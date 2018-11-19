@@ -3,6 +3,7 @@ package gapi
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/url"
 )
@@ -40,6 +41,28 @@ func (c *Client) Users() ([]User, error) {
 	return users, err
 }
 
+func (c *Client) User(userId int64) (User, error) {
+	var user User
+	req, err := c.newRequest("GET", fmt.Sprintf("/api/users/%d", userId), nil, nil)
+	if err != nil {
+		return user, err
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		return user, err
+	}
+	if resp.StatusCode != 200 {
+		return user, errors.New(resp.Status)
+	}
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return user, err
+	}
+
+	err = json.Unmarshal(data, &user)
+	return user, err
+}
+
 func (c *Client) UserByEmail(email string) (User, error) {
 	user := User{}
 	query := url.Values{}
@@ -73,4 +96,8 @@ func (c *Client) UserByEmail(email string) (User, error) {
 	}
 	user = User(tmp)
 	return user, err
+}
+
+func (c *Client) NewUser(user User) (User, error) {
+	return User{}, nil
 }
