@@ -16,8 +16,9 @@ const (
                       "created": "2017-12-15T10:40:45+01:00",
                       "updated": "2017-12-15T10:40:45+01:00"
                     }`
-	updateTeamJSON = `{"message":"Team updated"}`
-	deleteTeamJSON = `{"message":"Team deleted"}`
+	updateTeamJSON    = `{"message":"Team updated"}`
+	deleteTeamJSON    = `{"message":"Team deleted"}`
+	addTeamMemberJSON = `{"message":"Member added to Team"}`
 )
 
 func TestNewTeam(t *testing.T) {
@@ -73,6 +74,16 @@ func TestDeleteTeam(t *testing.T) {
 	defer server.Close()
 
 	err := client.DeleteTeam("1")
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestAddTeamMember(t *testing.T) {
+	server, client := gapiTestTools(200, addTeamMemberJSON)
+	defer server.Close()
+
+	err := client.AddTeamMember("1", 1)
 	if err != nil {
 		t.Error(err)
 	}

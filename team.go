@@ -17,6 +17,22 @@ type Team struct {
 	MemberCount int64  `json:"memberCount,omitempty"`
 }
 
+type TeamMember struct {
+	UserId    int64  `json:"userId,omitempty"`
+	TeamId    int64  `json:"teamId,omitempty"`
+	OrgId     int64  `json:"orgId,omitempty"`
+	Login     string `json:"login,omitempty"`
+	Email     string `json:"email,omitempty"`
+	AvatarUrl string `json:"avatarUrl,omitempty"`
+}
+
+type TeamSearchResponse struct {
+	TotalCount int64   `json:"totalCount,omitempty"`
+	Teams      []*Team `json:"teams,omitempty"`
+	Page       int64   `json:"page,omitempty"`
+	PerPage    int64   `json:"perPage,omitempty"`
+}
+
 type CreateTeamResponse struct {
 	Id int64 `json:"teamId"`
 }
@@ -40,6 +56,29 @@ func (c *Client) Team(id int64) (Team, error) {
 	}
 	err = json.Unmarshal(data, &team)
 	return team, err
+}
+
+func (c *Client) Teams() ([]*Team, error) {
+	var list []*Team
+	req, err := c.newRequest("GET", "/api/teams/search", nil, nil)
+	if err != nil {
+		return list, err
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		return list, err
+	}
+	if resp.StatusCode != 200 {
+		return list, errors.New(resp.Status)
+	}
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return list, err
+	}
+	var r TeamSearchResponse
+	err = json.Unmarshal(data, &r)
+	return r.Teams, err
 }
 
 func (c *Client) NewTeam(name string) (Team, error) {
@@ -104,4 +143,66 @@ func (c *Client) DeleteTeam(id string) error {
 		return errors.New(resp.Status)
 	}
 	return err
+}
+
+func (c *Client) AddTeamMember(id string, userID int64) error {
+	dataMap := map[string]interface{}{
+		"userId": userID,
+	}
+	data, err := json.Marshal(dataMap)
+	if err != nil {
+		return err
+	}
+	req, err := c.newRequest("POST", fmt.Sprintf("/api/teams/%s/members", id), nil, bytes.NewBuffer(data))
+	if err != nil {
+		return err
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != 200 {
+		return errors.New(resp.Status)
+	}
+	return err
+}
+
+func (c *Client) RemoveTeamMember(id string, userID int64) error {
+	req, err := c.newRequest("DELETE", fmt.Sprintf("/api/teams/%s/members/%d", id, userID), nil, nil)
+	if err != nil {
+		return err
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != 200 {
+		return errors.New(resp.Status)
+	}
+	return err
+}
+
+func (c *Client) TeamMembers(id string) ([]*TeamMember, error) {
+	req, err := c.newRequest("GET", fmt.Sprintf("/api/teams/%s/members", id), nil, nil)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != 200 {
+		return nil, errors.New(resp.Status)
+	}
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var list []*TeamMember
+	err = json.Unmarshal(data, &list)
+	return list, err
 }
