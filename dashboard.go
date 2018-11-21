@@ -7,12 +7,16 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/url"
 	"os"
+	"strconv"
+	"strings"
 )
 
 type DashboardMeta struct {
 	IsStarred bool   `json:"isStarred"`
 	Slug      string `json:"slug"`
+	Uid       string `json:"uid"`
 	Folder    int64  `json:"folderId"`
 }
 
@@ -22,6 +26,30 @@ type DashboardSaveResponse struct {
 	Uid     string `json:"uid"`
 	Status  string `json:"status"`
 	Version int64  `json:"version"`
+}
+
+const (
+	SearchTypeFolder    = "dash-folder"
+	SearchTypeDashboard = "dash-db"
+)
+
+type SearchResultItem struct {
+	Id    int64
+	Uid   string
+	Title string
+	Url   string
+	Type  string
+	Uri   string
+}
+
+func (item *SearchResultItem) IsFolder() bool {
+	return item.Type == SearchTypeFolder
+}
+func (item *SearchResultItem) Slug() string {
+	if item.IsFolder() {
+		return ""
+	}
+	return strings.Replace(item.Uri, "db/", "", 1)
 }
 
 type Dashboard struct {
@@ -119,6 +147,35 @@ func (c *Client) Dashboard(slug string) (*Dashboard, error) {
 	if os.Getenv("GF_LOG") != "" {
 		log.Printf("got back dashboard response  %s", data)
 	}
+	return result, err
+}
+
+func (c *Client) DashboardsByFolder(folderId int64) ([]*SearchResultItem, error) {
+	values := url.Values{}
+	values.Add("folderIds", strconv.Itoa(int(folderId)))
+	values.Add("starred", "false")
+	values.Add("type", "dash-db")
+
+	req, err := c.newRequest("GET", "/api/search", values, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != 200 {
+		return nil, errors.New(resp.Status)
+	}
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []*SearchResultItem
+	err = json.Unmarshal(data, &result)
 	return result, err
 }
 
