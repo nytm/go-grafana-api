@@ -1,0 +1,4 @@
+package: github.com/nytm/go-grafana-api
+import: []
+testImport:
+- package: github.com/gobs/pretty
