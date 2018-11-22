@@ -59,6 +59,16 @@ type Dashboard struct {
 	Overwrite bool                   `json:overwrite`
 }
 
+type DashboardData struct {
+	Id    int64  `json:"id"`
+	Uid   string `json:"uid"`
+	Title string `json:"title"`
+}
+type DashboardVersion struct {
+	Id   int64          `json:"id"`
+	Data *DashboardData `json:"data"`
+}
+
 // Deprecated: use NewDashboard instead
 func (c *Client) SaveDashboard(model map[string]interface{}, overwrite bool) (*DashboardSaveResponse, error) {
 	wrapper := map[string]interface{}{
@@ -147,13 +157,43 @@ func (c *Client) Dashboard(slug string) (*Dashboard, error) {
 	if os.Getenv("GF_LOG") != "" {
 		log.Printf("got back dashboard response  %s", data)
 	}
+	result.Meta.Uid = result.Model["uid"].(string)
+	return result, err
+}
+
+func (c *Client) DashboardByUid(uid string) (*Dashboard, error) {
+	path := fmt.Sprintf("/api/dashboards/uid/%s", uid)
+	req, err := c.newRequest("GET", path, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != 200 {
+		return nil, errors.New(resp.Status)
+	}
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	result := &Dashboard{}
+	err = json.Unmarshal(data, &result)
+	result.Folder = result.Meta.Folder
+	if os.Getenv("GF_LOG") != "" {
+		log.Printf("got back dashboard response  %s", data)
+	}
+	result.Meta.Uid = result.Model["uid"].(string)
 	return result, err
 }
 
 func (c *Client) DashboardsByFolder(folderId int64) ([]*SearchResultItem, error) {
 	values := url.Values{}
 	values.Add("folderIds", strconv.Itoa(int(folderId)))
-	values.Add("starred", "false")
 	values.Add("type", "dash-db")
 
 	req, err := c.newRequest("GET", "/api/search", values, nil)
@@ -179,6 +219,34 @@ func (c *Client) DashboardsByFolder(folderId int64) ([]*SearchResultItem, error)
 	return result, err
 }
 
+func (c *Client) HomeDashboard() (*Dashboard, error) {
+	req, err := c.newRequest("GET", "/api/dashboards/home", nil, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != 200 {
+		return nil, errors.New(resp.Status)
+	}
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	result := &Dashboard{}
+	err = json.Unmarshal(data, &result)
+	result.Folder = result.Meta.Folder
+	if os.Getenv("GF_LOG") != "" {
+		log.Printf("got back dashboard response  %s", data)
+	}
+	return result, err
+}
+
 func (c *Client) DeleteDashboard(slug string) error {
 	path := fmt.Sprintf("/api/dashboards/db/%s", slug)
 	req, err := c.newRequest("DELETE", path, nil, nil)
@@ -195,4 +263,41 @@ func (c *Client) DeleteDashboard(slug string) error {
 	}
 
 	return nil
+}
+
+// Add this api to transform id to uid
+func (c *Client) GetDashboardUidById(id int64) (string, error) {
+	path := fmt.Sprintf("/api/dashboards/id/%d/versions/1", id)
+	req, err := c.newRequest("GET", path, nil, nil)
+	if err != nil {
+		return "", err
+	}
+
+	resp, err := c.Do(req)
+	if err != nil {
+		return "", err
+	}
+	if resp.StatusCode != 200 {
+		return "", errors.New(resp.Status)
+	}
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	var result DashboardVersion
+	err = json.Unmarshal(data, &result)
+	if err != nil {
+		return "", err
+	}
+	return result.Data.Uid, err
+}
+
+func (c *Client) GetDashboardIdByUid(uid string) (int64, error) {
+	d, err := c.DashboardByUid(uid)
+	if err != nil {
+		return 0, err
+	}
+	return int64(d.Model["id"].(float64)), nil
 }
