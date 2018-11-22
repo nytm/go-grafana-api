@@ -42,3 +42,13 @@ func (p *PermissionType) Value() int8 {
 func (p *PermissionType) String() string {
 	return strconv.FormatInt(int64(p.Value()), 10)
 }
+
+type Permission struct {
+	Id         int64  `json:"id,omitempty"`
+	FolderUid  string `json:"folderUid,omitempty"`
+	UserId     int64  `json:"userId,omitempty"`
+	TeamId     int64  `json:"teamId,omitempty"`
+	Role       string `json:"role,omitempty"`
+	Permission int    `json:"permission,omitempty"`
+	IsFolder   bool   `json:"isFolder,omitempty"`
+}
