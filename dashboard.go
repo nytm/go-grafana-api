@@ -64,6 +64,10 @@ type DashboardData struct {
 	Uid   string `json:"uid"`
 	Title string `json:"title"`
 }
+type DashboardVersionItem struct {
+	Id      int64 `json:"id"`
+	Version int64 `json:"version"`
+}
 type DashboardVersion struct {
 	Id   int64          `json:"id"`
 	Data *DashboardData `json:"data"`
@@ -237,9 +241,41 @@ func (c *Client) DeleteDashboard(slug string) error {
 	return nil
 }
 
+func (c *Client) GetDashboardVersions(id int64) ([]*DashboardVersionItem, error) {
+	var list []*DashboardVersionItem
+	path := fmt.Sprintf("/api/dashboards/id/%d/versions/", id)
+	req, err := c.newRequest("GET", path, nil, nil)
+	if err != nil {
+		return list, err
+	}
+
+	resp, err := c.Do(req)
+	if err != nil {
+		return list, err
+	}
+	if resp.StatusCode != 200 {
+		return list, errors.New(resp.Status)
+	}
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return list, err
+	}
+
+	err = json.Unmarshal(data, &list)
+	if err != nil {
+		return list, err
+	}
+	return list, err
+}
+
 // Add this api to transform id to uid
 func (c *Client) GetDashboardUidById(id int64) (string, error) {
-	path := fmt.Sprintf("/api/dashboards/id/%d/versions/1", id)
+	versions, err := c.GetDashboardVersions(id)
+	if err != nil {
+		return "", err
+	}
+	path := fmt.Sprintf("/api/dashboards/id/%d/versions/%d", id, versions[0].Version)
 	req, err := c.newRequest("GET", path, nil, nil)
 	if err != nil {
 		return "", err
