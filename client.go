@@ -2,14 +2,20 @@ package gapi
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"path"
 	"strings"
+)
+
+var (
+	ErrNotFound = errors.New("Resources Not Found")
 )
 
 type Client struct {
@@ -61,4 +67,24 @@ func (c *Client) newRequest(method, requestPath string, query url.Values, body i
 
 	req.Header.Add("Content-Type", "application/json")
 	return req, err
+}
+
+func (c *Client) sendRequest(req *http.Request) ([]byte, error) {
+	resp, err := c.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode == 404 {
+		return nil, ErrNotFound
+	}
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != 200 {
+		return data, fmt.Errorf("status: %d, body: %s", resp.StatusCode, data)
+	}
+	return data, nil
 }
