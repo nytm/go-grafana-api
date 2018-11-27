@@ -1,8 +1,9 @@
 package gapi
 
 import (
-	"github.com/gobs/pretty"
 	"testing"
+
+	"github.com/gobs/pretty"
 )
 
 const (
@@ -81,6 +82,49 @@ const (
   "message":"Folder deleted"
 }
 `
+	getFolderPermissionJSON = `
+	[
+  {
+    "id": 1,
+    "folderId": -1,
+    "created": "2017-06-20T02:00:00+02:00",
+    "updated": "2017-06-20T02:00:00+02:00",
+    "userId": 0,
+    "userLogin": "",
+    "userEmail": "",
+    "teamId": 0,
+    "team": "",
+    "role": "Viewer",
+    "permission": 1,
+    "permissionName": "View",
+    "uid": "nErXDvCkzz",
+    "title": "",
+    "slug": "",
+    "isFolder": false,
+    "url": ""
+  },
+  {
+    "id": 2,
+    "dashboardId": -1,
+    "created": "2017-06-20T02:00:00+02:00",
+    "updated": "2017-06-20T02:00:00+02:00",
+    "userId": 0,
+    "userLogin": "",
+    "userEmail": "",
+    "teamId": 0,
+    "team": "",
+    "role": "Editor",
+    "permission": 2,
+    "permissionName": "Edit",
+    "uid": "",
+    "title": "",
+    "slug": "",
+    "isFolder": false,
+    "url": ""
+  }
+]
+	`
+	updateFolderPermissionJSON = `{"message":"Folder permissions updated"}`
 )
 
 func TestFolders(t *testing.T) {
@@ -150,6 +194,35 @@ func TestDeleteFolder(t *testing.T) {
 	defer server.Close()
 
 	err := client.DeleteFolder("nErXDvCkzz")
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestGetFolderPermission(t *testing.T) {
+	server, client := gapiTestTools(200, getFolderPermissionJSON)
+	defer server.Close()
+
+	permList, err := client.GetFolderPermission("nErXDvCkzz")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(permList) == 0 {
+		t.Errorf("Error Response")
+	}
+}
+
+func TestUpdateFolderPermission(t *testing.T) {
+	server, client := gapiTestTools(200, updateFolderPermissionJSON)
+	defer server.Close()
+
+	list := make([]*FolderPermission, 0)
+	list = append(list, &FolderPermission{
+		Role:       "Viewer",
+		Permission: PermissionView,
+	})
+	err := client.UpdateFolderPermission("nErXDvCkzz", list)
 	if err != nil {
 		t.Error(err)
 	}

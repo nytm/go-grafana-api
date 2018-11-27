@@ -14,6 +14,13 @@ type Folder struct {
 	Title string `json:"title"`
 }
 
+type FolderPermission struct {
+	Role       string         `json:"role,omitempty"`
+	TeamId     int64          `json:"teamId,omitempty"`
+	UserId     int64          `json:"userId,omitempty"`
+	Permission PermissionType `json:"permission,omitempty"`
+}
+
 func (c *Client) Folders() ([]Folder, error) {
 	folders := make([]Folder, 0)
 
@@ -118,4 +125,45 @@ func (c *Client) DeleteFolder(id string) error {
 		return errors.New(resp.Status)
 	}
 	return err
+}
+
+func (c *Client) GetFolderPermission(id string) ([]*FolderPermission, error) {
+	var permissionList []*FolderPermission
+	req, err := c.newRequest("GET", fmt.Sprintf("/api/folders/%s/permissions", id), nil, nil)
+	if err != nil {
+		return permissionList, err
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		return permissionList, err
+	}
+	if resp.StatusCode != 200 {
+		return permissionList, errors.New(resp.Status)
+	}
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return permissionList, err
+	}
+	err = json.Unmarshal(data, &permissionList)
+	return permissionList, err
+}
+
+func (c *Client) UpdateFolderPermission(id string, list []*FolderPermission) error {
+	dataMap := map[string]interface{}{
+		"items": list,
+	}
+	data, err := json.Marshal(dataMap)
+	req, err := c.newRequest("POST", fmt.Sprintf("/api/folders/%s/permissions", id), nil, bytes.NewBuffer(data))
+	if err != nil {
+		return err
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode != 200 {
+		return errors.New(resp.Status)
+	}
+	return nil
 }
