@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	ErrNotFound = errors.New("Resources Not Found")
+	ErrNotFound = errors.New("404 Not Found")
 )
 
 type Client struct {
