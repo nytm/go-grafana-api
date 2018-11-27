@@ -13,6 +13,13 @@ type Org struct {
 	Name string `json:"name"`
 }
 
+type OrgPreferences struct {
+	Theme            string `json:"theme,omitempty"`
+	HomeDashboardUid string `json:"homeDashboardUid,omitempty"`
+	HomeDashboardId  int64  `json:"homeDashboardId,omitempty"`
+	Timezone         string `json:"timezone,omitempty"`
+}
+
 func (c *Client) Orgs() ([]Org, error) {
 	orgs := make([]Org, 0)
 
@@ -126,6 +133,62 @@ func (c *Client) UpdateOrg(id int64, name string) error {
 		return errors.New(resp.Status)
 	}
 	return err
+}
+
+func (c *Client) GetOrgPreferences() (*OrgPreferences, error) {
+	var prefs *OrgPreferences
+	req, err := c.newRequest("GET", "/api/org/preferences", nil, nil)
+	if err != nil {
+		return prefs, err
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		return prefs, err
+	}
+	if resp.StatusCode != 200 {
+		return prefs, errors.New(resp.Status)
+	}
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return prefs, err
+	}
+	err = json.Unmarshal(data, &prefs)
+	if err != nil {
+		return prefs, err
+	}
+
+	if prefs.HomeDashboardId != 0 {
+		uid, err := c.GetDashboardUidById(prefs.HomeDashboardId)
+		if err != nil {
+			return prefs, err
+		}
+		prefs.HomeDashboardUid = uid
+	}
+	return prefs, err
+}
+
+func (c *Client) UpdateOrgPreferences(prefs *OrgPreferences) error {
+	if prefs.HomeDashboardUid != "" {
+		id, err := c.GetDashboardIdByUid(prefs.HomeDashboardUid)
+		if err != nil {
+			return err
+		}
+		prefs.HomeDashboardId = id
+	}
+
+	data, err := json.Marshal(prefs)
+	req, err := c.newRequest("PUT", "/api/org/preferences", nil, bytes.NewBuffer(data))
+	if err != nil {
+		return err
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode != 200 {
+		return errors.New(resp.Status)
+	}
+	return nil
 }
 
 func (c *Client) DeleteOrg(id int64) error {
