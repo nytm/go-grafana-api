@@ -12,6 +12,26 @@ import (
 
 const (
 	createdDataSourceJSON = `{"id":1,"message":"Datasource added", "name": "test_datasource"}`
+	getDataSourcesJSON    = `
+		[
+		  {
+		    "id":1,
+		    "orgId":1,
+		    "name":"datasource_elastic",
+		    "type":"elasticsearch",
+		    "access":"proxy",
+		    "url":"http://mydatasource.com",
+		    "password":"",
+		    "user":"",
+		    "database":"grafana-dash",
+		    "basicAuth":false,
+		    "basicAuthUser":"",
+		    "basicAuthPassword":"",
+		    "isDefault":false,
+		    "jsonData":null
+		  }
+		]
+		`
 )
 
 func gapiTestTools(code int, body string) (*httptest.Server, *Client) {
@@ -71,5 +91,18 @@ func TestNewDataSource(t *testing.T) {
 
 	if created != 1 {
 		t.Error("datasource creation response should return the created datasource ID")
+	}
+}
+
+func TestDataSources(t *testing.T) {
+	server, client := gapiTestTools(200, getDataSourcesJSON)
+	defer server.Close()
+
+	list, err := client.DataSources()
+	if err != nil {
+		t.Error(err)
+	}
+	if len(list) == 0 {
+		t.Error("Datasources parse error")
 	}
 }
