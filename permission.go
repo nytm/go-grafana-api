@@ -1,6 +1,7 @@
 package gapi
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
@@ -37,6 +38,20 @@ func (p *PermissionType) Value() int8 {
 		return 4
 	}
 	return 0
+}
+
+func (d *PermissionType) UnmarshalJSON(b []byte) error {
+	var s int64
+	if err := json.Unmarshal(b, &s); err != nil {
+		return err
+	}
+	var err error
+	*d, err = NewPermissionType(int(s))
+	return err
+}
+
+func (d *PermissionType) MarshalJSON() ([]byte, error) {
+	return []byte(d.String()), nil
 }
 
 func (p *PermissionType) String() string {
