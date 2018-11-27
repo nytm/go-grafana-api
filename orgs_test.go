@@ -1,16 +1,19 @@
 package gapi
 
 import (
-	"github.com/gobs/pretty"
 	"testing"
+
+	"github.com/gobs/pretty"
 )
 
 const (
-	getOrgsJSON    = `[{"id":1,"name":"Main Org."},{"id":2,"name":"Test Org."}]`
-	getOrgJSON     = `{"id":1,"name":"Main Org.","address":{"address1":"","address2":"","city":"","zipCode":"","state":"","country":""}}`
-	createdOrgJSON = `{"message":"Organization created","orgId":1}`
-	updatedOrgJSON = `{"message":"Organization updated"}`
-	deletedOrgJSON = `{"message":"Organization deleted"}`
+	getOrgsJSON        = `[{"id":1,"name":"Main Org."},{"id":2,"name":"Test Org."}]`
+	getOrgJSON         = `{"id":1,"name":"Main Org.","address":{"address1":"","address2":"","city":"","zipCode":"","state":"","country":""}}`
+	createdOrgJSON     = `{"message":"Organization created","orgId":1}`
+	updatedOrgJSON     = `{"message":"Organization updated"}`
+	deletedOrgJSON     = `{"message":"Organization deleted"}`
+	getOrgPerfsJSON    = `{"theme": "","homeDashboardId":0,"timezone":"utc"}`
+	updateOrgPerfsJSON = `{"message":"Preferences updated"}`
 )
 
 func TestOrgs(t *testing.T) {
@@ -97,6 +100,34 @@ func TestDeleteOrg(t *testing.T) {
 	defer server.Close()
 
 	err := client.DeleteOrg(int64(1))
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestGetOrgPreferences(t *testing.T) {
+	server, client := gapiTestTools(200, getOrgPerfsJSON)
+	defer server.Close()
+
+	prefs, err := client.GetOrgPreferences()
+	if err != nil {
+		t.Error(err)
+	}
+	if prefs == nil {
+		t.Errorf("Org Preferences should not be nil")
+	}
+}
+
+func TestUpdateOrgPreferences(t *testing.T) {
+	server, client := gapiTestTools(200, updateOrgPerfsJSON)
+	defer server.Close()
+
+	prefs := &OrgPreferences{
+		Theme:           "light",
+		HomeDashboardId: 0,
+		Timezone:        "utc",
+	}
+	err := client.UpdateOrgPreferences(prefs)
 	if err != nil {
 		t.Error(err)
 	}
