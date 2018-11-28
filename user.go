@@ -1,8 +1,10 @@
 package gapi
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/url"
 )
@@ -14,6 +16,12 @@ type User struct {
 	Login    string `json:"login,omitempty"`
 	Password string `json:"password,omitempty"`
 	IsAdmin  bool   `json:"isAdmin,omitempty"`
+}
+
+type UserUpdate struct {
+	Email string `json:"email,omitempty"`
+	Name  string `json:"name,omitempty"`
+	Login string `json:"login,omitempty"`
 }
 
 func (c *Client) Users() ([]User, error) {
@@ -38,6 +46,45 @@ func (c *Client) Users() ([]User, error) {
 		return users, err
 	}
 	return users, err
+}
+
+func (c *Client) User(userId int64) (User, error) {
+	var user User
+	req, err := c.newRequest("GET", fmt.Sprintf("/api/users/%d", userId), nil, nil)
+	if err != nil {
+		return user, err
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		return user, err
+	}
+	if resp.StatusCode != 200 {
+		return user, errors.New(resp.Status)
+	}
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return user, err
+	}
+
+	err = json.Unmarshal(data, &user)
+	return user, err
+}
+
+func (c *Client) UpdateUser(userId int64, u UserUpdate) error {
+	data, err := json.Marshal(u)
+	req, err := c.newRequest("PUT", fmt.Sprintf("/api/users/%d", userId), nil, bytes.NewBuffer(data))
+	if err != nil {
+		return err
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode != 200 {
+		data, _ = ioutil.ReadAll(resp.Body)
+		return fmt.Errorf("status: %s body: %s", resp.Status, data)
+	}
+	return nil
 }
 
 func (c *Client) UserByEmail(email string) (User, error) {
