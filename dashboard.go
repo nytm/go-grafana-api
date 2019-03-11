@@ -70,7 +70,7 @@ func (c *Client) NewDashboard(dashboard Dashboard) (*DashboardSaveResponse, erro
 	if err != nil {
 		return nil, err
 	}
-	req, err := c.newRequest("POST", "/api/dashboards/db", nil, bytes.NewBuffer(data))
+	req, err := c.newRequest("POST", "/api/dashboards/import", nil, bytes.NewBuffer(data))
 	if err != nil {
 		return nil, err
 	}
