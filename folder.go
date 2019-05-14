@@ -57,6 +57,27 @@ func (c *Client) Folder(id int64) (*Folder, error) {
 	return folder, err
 }
 
+func (c *Client) FolderByUID(uid string) (*Folder, error) {
+	folder := &Folder{}
+	req, err := c.newRequest("GET", fmt.Sprintf("/api/folders/%s", uid), nil, nil)
+	if err != nil {
+		return folder, err
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		return folder, err
+	}
+	if resp.StatusCode != 200 {
+		return folder, errors.New(resp.Status)
+	}
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return folder, err
+	}
+	err = json.Unmarshal(data, &folder)
+	return folder, err
+}
+
 func (c *Client) NewFolder(title string) (Folder, error) {
 	folder := Folder{}
 	dataMap := map[string]string{
