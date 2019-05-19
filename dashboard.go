@@ -31,6 +31,10 @@ type Dashboard struct {
 	Overwrite bool                   `json:overwrite`
 }
 
+type DashboardDeleteResponse struct {
+	Title string `json:title`
+}
+
 // Deprecated: use NewDashboard instead
 func (c *Client) SaveDashboard(model map[string]interface{}, overwrite bool) (*DashboardSaveResponse, error) {
 	wrapper := map[string]interface{}{
@@ -122,20 +126,29 @@ func (c *Client) Dashboard(slug string) (*Dashboard, error) {
 	return result, err
 }
 
-func (c *Client) DeleteDashboard(slug string) error {
-	path := fmt.Sprintf("/api/dashboards/db/%s", slug)
+// DeleteDashboard deletes a grafana dashoboard
+func (c *Client) DeleteDashboard(uid string) (string, error) {
+	deleted := &DashboardDeleteResponse{}
+	path := fmt.Sprintf("/api/dashboards/uid/%s", uid)
 	req, err := c.newRequest("DELETE", path, nil, nil)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	resp, err := c.Do(req)
 	if err != nil {
-		return err
+		return "", err
 	}
 	if resp.StatusCode != 200 {
-		return errors.New(resp.Status)
+		return "", errors.New(resp.Status)
 	}
-
-	return nil
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+	err = json.Unmarshal(data, &deleted)
+	if err != nil {
+		return "", err
+	}
+	return deleted.Title, nil
 }
