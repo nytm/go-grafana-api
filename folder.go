@@ -78,6 +78,38 @@ func (c *Client) FolderByUID(uid string) (*Folder, error) {
 	return folder, err
 }
 
+// NewFolderWithUID allows to create a new folder by specifying a custom
+// UID. It is duplicated in order to maintain compatibility with existent tools
+func (c *Client) NewFolderWithUID(title, uid string) (Folder, error) {
+	folder := Folder{}
+	dataMap := map[string]string{
+		"title": title,
+		"uid":   uid,
+	}
+	data, err := json.Marshal(dataMap)
+	req, err := c.newRequest("POST", "/api/folders", nil, bytes.NewBuffer(data))
+	if err != nil {
+		return folder, err
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		return folder, err
+	}
+	if resp.StatusCode != 200 {
+		data, _ = ioutil.ReadAll(resp.Body)
+		return folder, fmt.Errorf("status: %s body: %s", resp.Status, data)
+	}
+	data, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return folder, err
+	}
+	err = json.Unmarshal(data, &folder)
+	if err != nil {
+		return folder, err
+	}
+	return folder, err
+}
+
 func (c *Client) NewFolder(title string) (Folder, error) {
 	folder := Folder{}
 	dataMap := map[string]string{
