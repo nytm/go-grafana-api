@@ -16,10 +16,12 @@ type DashboardMeta struct {
 	Folder    int64  `json:"folderId"`
 }
 
+// DashboardSaveResponse grafana response for create dashboard
 type DashboardSaveResponse struct {
 	Slug    string `json:"slug"`
-	Id      int64  `json:"id"`
-	Uid     string `json:"uid"`
+	ID      int64  `json:"id"`
+	UID     string `json:"uid"`
+	URL     string `json:"url"`
 	Status  string `json:"status"`
 	Version int64  `json:"version"`
 }
@@ -31,6 +33,7 @@ type Dashboard struct {
 	Overwrite bool                   `json:overwrite`
 }
 
+// DashboardDeleteResponse grafana response for delete dashboard
 type DashboardDeleteResponse struct {
 	Title string `json:title`
 }
@@ -97,6 +100,37 @@ func (c *Client) NewDashboard(dashboard Dashboard) (*DashboardSaveResponse, erro
 	return result, err
 }
 
+// GetDashboard get a dashboard by UID
+func (c *Client) GetDashboard(uid string) (*Dashboard, error) {
+	path := fmt.Sprintf("/api/dashboards/uid/%s", uid)
+	req, err := c.newRequest("GET", path, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != 200 {
+		return nil, errors.New(resp.Status)
+	}
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	result := &Dashboard{}
+	err = json.Unmarshal(data, &result)
+	result.Folder = result.Meta.Folder
+	if os.Getenv("GF_LOG") != "" {
+		log.Printf("got back dashboard response  %s", data)
+	}
+	return result, err
+}
+
+// Deprecated: use GetDashboard instead
 func (c *Client) Dashboard(slug string) (*Dashboard, error) {
 	path := fmt.Sprintf("/api/dashboards/db/%s", slug)
 	req, err := c.newRequest("GET", path, nil, nil)
