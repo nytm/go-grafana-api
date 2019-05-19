@@ -11,9 +11,10 @@ import (
 )
 
 type DashboardMeta struct {
-	IsStarred bool   `json:"isStarred"`
-	Slug      string `json:"slug"`
-	Folder    int64  `json:"folderId"`
+	IsStarred   bool   `json:"isStarred"`
+	Slug        string `json:"slug"`
+	Folder      int64  `json:"folderId"`
+	FolderTitle string `json:"folderTitle"`
 }
 
 // DashboardSaveResponse grafana response for create dashboard
