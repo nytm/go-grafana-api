@@ -35,6 +35,19 @@ type Dashboard struct {
 	Overwrite bool                   `json:overwrite`
 }
 
+// Dashboards represent json returned by search API
+type Dashboards struct {
+	ID          int64  `json:"id"`
+	UID         string `json:"uid"`
+	Title       string `json:"title"`
+	URI         string `json:"uri"`
+	URL         string `json:"url"`
+	Starred     bool   `json:"isStarred"`
+	FolderID    int64  `json:"folderId"`
+	FolderUID   string `json:"folderUid"`
+	FolderTitle string `json:"folderTitle"`
+}
+
 // DashboardDeleteResponse grafana response for delete dashboard
 type DashboardDeleteResponse struct {
 	Title string `json:title`
@@ -103,8 +116,8 @@ func (c *Client) NewDashboard(dashboard Dashboard) (*DashboardSaveResponse, erro
 }
 
 // SearchDashboard search a dashboard in Grafana
-func (c *Client) SearchDashboard(query string, folderID string) ([]Dashboard, error) {
-	dashboards := make([]Dashboard, 0)
+func (c *Client) SearchDashboard(query string, folderID string) ([]Dashboards, error) {
+	dashboards := make([]Dashboards, 0)
 	path := "/api/search"
 
 	params := url.Values{}
@@ -129,7 +142,7 @@ func (c *Client) SearchDashboard(query string, folderID string) ([]Dashboard, er
 	}
 
 	err = json.Unmarshal(data, &dashboards)
-	log.Printf("got back dashboard response  %s", data)
+
 	return dashboards, err
 }
 
