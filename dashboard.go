@@ -7,7 +7,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/url"
 	"os"
+	"strings"
 )
 
 type DashboardMeta struct {
@@ -99,6 +101,36 @@ func (c *Client) NewDashboard(dashboard Dashboard) (*DashboardSaveResponse, erro
 	result := &DashboardSaveResponse{}
 	err = json.Unmarshal(data, &result)
 	return result, err
+}
+
+// SearchDashboard search a dashboard in Grafana
+func (c *Client) SearchDashboard(query string, tags []string, folderIds []string) ([]Dashboard, error) {
+	dashboards := make([]Dashboard, 0)
+	path := "/api/search"
+
+	params := url.Values{}
+	params.Add("type", "dash-db")
+	params.Add("query", query)
+	params.Add("tags", strings.Join(tags, ","))
+	params.Add("folderIds", strings.Join(folderIds, ","))
+
+	req, err := c.newRequest("GET", path, params, nil)
+	if err != nil {
+		return dashboards, err
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		return dashboards, err
+	}
+	if resp.StatusCode != 200 {
+		return dashboards, errors.New(resp.Status)
+	}
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return dashboards, err
+	}
+	err = json.Unmarshal(data, &dashboards)
+	return dashboards, err
 }
 
 // GetDashboard get a dashboard by UID

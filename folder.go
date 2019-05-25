@@ -58,7 +58,7 @@ func (c *Client) Folder(id int64) (*Folder, error) {
 	return folder, err
 }
 
-// SearchFolder search an object in Grafana
+// SearchFolder search a folder in Grafana
 func (c *Client) SearchFolder(query string) ([]Folder, error) {
 	folders := make([]Folder, 0)
 	path := "/api/search"
