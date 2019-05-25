@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net/url"
 )
 
 type Folder struct {
@@ -55,6 +56,34 @@ func (c *Client) Folder(id int64) (*Folder, error) {
 	}
 	err = json.Unmarshal(data, &folder)
 	return folder, err
+}
+
+// SearchFolder search an object in Grafana
+func (c *Client) SearchFolder(query string) ([]Folder, error) {
+	folders := make([]Folder, 0)
+	path := "/api/search"
+
+	params := url.Values{}
+	params.Add("type", "dash-folder")
+	params.Add("query", query)
+
+	req, err := c.newRequest("GET", path, params, nil)
+	if err != nil {
+		return folders, err
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		return folders, err
+	}
+	if resp.StatusCode != 200 {
+		return folders, errors.New(resp.Status)
+	}
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return folders, err
+	}
+	err = json.Unmarshal(data, &folders)
+	return folders, err
 }
 
 func (c *Client) FolderByUID(uid string) (*Folder, error) {
