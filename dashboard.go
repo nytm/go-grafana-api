@@ -127,7 +127,9 @@ func (c *Client) SearchDashboard(query string, folderID string) ([]Dashboard, er
 	if err != nil {
 		return dashboards, err
 	}
+
 	err = json.Unmarshal(data, &dashboards)
+	log.Printf("got back dashboard response  %s", data)
 	return dashboards, err
 }
 
