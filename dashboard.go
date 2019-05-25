@@ -9,7 +9,6 @@ import (
 	"log"
 	"net/url"
 	"os"
-	"strings"
 )
 
 type DashboardMeta struct {
@@ -104,15 +103,14 @@ func (c *Client) NewDashboard(dashboard Dashboard) (*DashboardSaveResponse, erro
 }
 
 // SearchDashboard search a dashboard in Grafana
-func (c *Client) SearchDashboard(query string, tags []string, folderIds []string) ([]Dashboard, error) {
+func (c *Client) SearchDashboard(query string, folderID string) ([]Dashboard, error) {
 	dashboards := make([]Dashboard, 0)
 	path := "/api/search"
 
 	params := url.Values{}
 	params.Add("type", "dash-db")
 	params.Add("query", query)
-	params.Add("tags", strings.Join(tags, ","))
-	params.Add("folderIds", strings.Join(folderIds, ","))
+	params.Add("folderIds", folderID)
 
 	req, err := c.newRequest("GET", path, params, nil)
 	if err != nil {
