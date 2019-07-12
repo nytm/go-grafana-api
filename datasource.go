@@ -36,7 +36,11 @@ type JSONData struct {
 	AuthType                string `json:"authType,omitempty"`
 	CustomMetricsNamespaces string `json:"customMetricsNamespaces,omitempty"`
 	DefaultRegion           string `json:"defaultRegion,omitempty"`
-	TlsSkipVerify           bool   `json:"tlsSkipVerify,omitempty"`
+  EsVersion               int64  `json:esVersion,omitempty`
+  TlsSkipVerify           bool   `json:"tlsSkipVerify,omitempty"`
+  HttpMethod              string `json:httpMethod,omitempty`
+  QueryTimeout            string `json:queryTimeout,omitempty`
+  TimeInterval            string `json:timeInterval,omitempty`
 }
 
 // SecureJSONData is a representation of the datasource `secureJsonData` property
