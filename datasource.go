@@ -36,7 +36,6 @@ type JSONData struct {
 	AuthType                string `json:"authType,omitempty"`
 	CustomMetricsNamespaces string `json:"customMetricsNamespaces,omitempty"`
 	DefaultRegion           string `json:"defaultRegion,omitempty"`
-  EsVersion               int64  `json:esVersion,omitempty`
   TlsSkipVerify           bool   `json:"tlsSkipVerify,omitempty"`
   HttpMethod              string `json:httpMethod,omitempty`
   QueryTimeout            string `json:queryTimeout,omitempty`
