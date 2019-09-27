@@ -97,6 +97,33 @@ func (c *Client) UpdateDataSource(s *DataSource) error {
 	return nil
 }
 
+func (c *Client) DataSources() ([]DataSource, error) {
+	datasources := make([]DataSource, 0)
+
+	path := fmt.Sprintf("/api/datasources")
+	req, err := c.newRequest("GET", path, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.Do(req)
+	if err != nil {
+		return datasources, err
+	}
+	if resp.StatusCode != 200 {
+		return datasources, errors.New(resp.Status)
+	}
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return datasources, err
+	}
+
+	err = json.Unmarshal(data, &datasources)
+
+	return datasources, err
+}
+
 func (c *Client) DataSource(id int64) (*DataSource, error) {
 	path := fmt.Sprintf("/api/datasources/%d", id)
 	req, err := c.newRequest("GET", path, nil, nil)
