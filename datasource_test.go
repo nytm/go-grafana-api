@@ -77,7 +77,6 @@ func TestNewDataSource(t *testing.T) {
 func TestNewPrometheusDataSource(t *testing.T) {
 	server, client := gapiTestTools(200, createdDataSourceJSON)
 	defer server.Close()
-	//client_acc, _ := New("admin:admin", "http://localhost:3000")
 
 	ds := &DataSource{
 		Name:      "foo_prometheus",
@@ -93,7 +92,6 @@ func TestNewPrometheusDataSource(t *testing.T) {
 	}
 
 	created, err := client.NewDataSource(ds)
-	//created, err := client_acc.NewDataSource(ds)
 	if err != nil {
 		t.Error(err)
 	}
