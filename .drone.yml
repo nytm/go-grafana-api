@@ -7,5 +7,5 @@ steps:
 - name: test
   image: golang
   commands:
-  - go get ./...
+  - go get -t ./...
   - go test
