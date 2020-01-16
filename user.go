@@ -76,6 +76,65 @@ func (c *Client) UserByEmail(email string) (User, error) {
 	return user, err
 }
 
+// CurrentUser returns user info about the currently-logged-in user
+// https://grafana.com/docs/grafana/latest/http_api/user/#actual-user
+func (c *Client) CurrentUser() (User, error) {
+	user := User{}
+	req, err := c.newRequest("GET", "/api/user", nil, nil)
+	if err != nil {
+		return user, err
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		return user, err
+	}
+	if resp.StatusCode != 200 {
+		return user, errors.New(resp.Status)
+	}
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return user, err
+	}
+	tmp := struct {
+		Id       int64  `json:"id,omitempty"`
+		Email    string `json:"email,omitempty"`
+		Name     string `json:"name,omitempty"`
+		Login    string `json:"login,omitempty"`
+		Password string `json:"password,omitempty"`
+		IsAdmin  bool   `json:"isGrafanaAdmin,omitempty"`
+	}{}
+	err = json.Unmarshal(data, &tmp)
+	if err != nil {
+		return user, err
+	}
+	user = User(tmp)
+	return user, err
+}
+
+// CurrentUserOrgs returns org membership for the currently-logged-in user
+// https://grafana.com/docs/grafana/latest/http_api/user/#organizations-of-the-actual-user
+func (c *Client) CurrentUserOrgs() ([]Org, error) {
+	orgs := make([]Org, 0)
+
+	req, err := c.newRequest("GET", "/api/user/orgs/", nil, nil)
+	if err != nil {
+		return orgs, err
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		return orgs, err
+	}
+	if resp.StatusCode != 200 {
+		return orgs, errors.New(resp.Status)
+	}
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return orgs, err
+	}
+	err = json.Unmarshal(data, &orgs)
+	return orgs, err
+}
+
 // SwitchUserOrganization changes the user's currently-selected organization
 // https://grafana.com/docs/grafana/latest/http_api/user/#switch-user-context-for-a-specified-user
 func (c *Client) SwitchUserOrganization(userID, orgID int64) error {
