@@ -3,6 +3,7 @@ package gapi
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/url"
 )
@@ -73,4 +74,21 @@ func (c *Client) UserByEmail(email string) (User, error) {
 	}
 	user = User(tmp)
 	return user, err
+}
+
+// SwitchUserOrganization changes the user's currently-selected organization
+// https://grafana.com/docs/grafana/latest/http_api/user/#switch-user-context-for-a-specified-user
+func (c *Client) SwitchUserOrganization(userID, orgID int64) error {
+	req, err := c.newRequest("POST", fmt.Sprintf("/api/users/%d/using/%d", userID, orgID), nil, nil)
+	if err != nil {
+		return err
+	}
+
+	response, err := c.Do(req)
+	if err != nil {
+		return err
+	} else if response.StatusCode != 200 {
+		return errors.New(response.Status)
+	}
+	return nil
 }
