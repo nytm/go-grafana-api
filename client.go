@@ -31,7 +31,7 @@ func New(auth, baseURL string) (*Client, error) {
 	if strings.Contains(auth, ":") {
 		split := strings.Split(auth, ":")
 		u.User = url.UserPassword(split[0], split[1])
-	} else {
+	} else if auth != "" {
 		key = fmt.Sprintf("Bearer %s", auth)
 	}
 	return &Client{
