@@ -111,10 +111,16 @@ func (c *Client) CurrentUser() (User, error) {
 	return user, err
 }
 
+type OrgMembership struct {
+	Id   int64  `json:"id"`
+	Name string `json:"name"`
+	Role string `json:"role"`
+}
+
 // CurrentUserOrgs returns org membership for the currently-logged-in user
 // https://grafana.com/docs/grafana/latest/http_api/user/#organizations-of-the-actual-user
-func (c *Client) CurrentUserOrgs() ([]Org, error) {
-	orgs := make([]Org, 0)
+func (c *Client) CurrentUserOrgs() ([]OrgMembership, error) {
+	orgs := make([]OrgMembership, 0)
 
 	req, err := c.newRequest("GET", "/api/user/orgs/", nil, nil)
 	if err != nil {
