@@ -17,13 +17,15 @@ type DataSource struct {
 
 	Database string `json:"database,omitempty"`
 	User     string `json:"user,omitempty"`
+	// Deprecated in favor of secureJsonData.password
 	Password string `json:"password,omitempty"`
 
 	OrgId     int64 `json:"orgId,omitempty"`
 	IsDefault bool  `json:"isDefault"`
 
-	BasicAuth         bool   `json:"basicAuth"`
-	BasicAuthUser     string `json:"basicAuthUser,omitempty"`
+	BasicAuth     bool   `json:"basicAuth"`
+	BasicAuthUser string `json:"basicAuthUser,omitempty"`
+	// Deprecated in favor of secureJsonData.basicAuthPassword
 	BasicAuthPassword string `json:"basicAuthPassword,omitempty"`
 
 	JSONData       JSONData       `json:"jsonData,omitempty"`
