@@ -86,12 +86,13 @@ func (c *Client) NewFolder(title string) (Folder, error) {
 	return folder, err
 }
 
-func (c *Client) UpdateFolder(id string, name string) error {
-	dataMap := map[string]string{
-		"name": name,
+func (c *Client) UpdateFolder(uid string, title string) error {
+	dataMap := map[string]interface{}{
+		"title":     title,
+		"overwrite": true,
 	}
 	data, err := json.Marshal(dataMap)
-	req, err := c.newRequest("PUT", fmt.Sprintf("/api/folders/%s", id), nil, bytes.NewBuffer(data))
+	req, err := c.newRequest("PUT", fmt.Sprintf("/api/folders/%s", uid), nil, bytes.NewBuffer(data))
 	if err != nil {
 		return err
 	}
@@ -105,8 +106,8 @@ func (c *Client) UpdateFolder(id string, name string) error {
 	return err
 }
 
-func (c *Client) DeleteFolder(id string) error {
-	req, err := c.newRequest("DELETE", fmt.Sprintf("/api/folders/%s", id), nil, nil)
+func (c *Client) DeleteFolder(uid string) error {
+	req, err := c.newRequest("DELETE", fmt.Sprintf("/api/folders/%s", uid), nil, nil)
 	if err != nil {
 		return err
 	}
