@@ -112,7 +112,7 @@ func (c *Client) CurrentUser() (User, error) {
 }
 
 type OrgMembership struct {
-	Id   int64  `json:"id"`
+	Id   int64  `json:"orgId"`
 	Name string `json:"name"`
 	Role string `json:"role"`
 }
