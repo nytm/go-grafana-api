@@ -84,7 +84,6 @@ type JSONData struct {
 	ClientEmail 	   string `json:"clientEmail,omitempty"`
 	DefaultProject     string `json:"defaultProject,omitempty"`
 	TokenUri 	   string `json:"tokenUri,omitempty"`
-	
 }
 
 // SecureJSONData is a representation of the datasource `secureJsonData` property
