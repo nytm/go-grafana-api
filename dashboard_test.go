@@ -7,41 +7,47 @@ import (
 )
 
 const (
-	createdAndUpdateDashboardResponse = `{
-		"slug": "test",
-		"id": 1,
-		"uid": "nErXDvCkzz",
-		"status": "success",
-		"version": 1
-	}`
+	createdAndUpdateDashboardResponse = `
+{
+	"slug": "test",
+	"id": 1,
+	"uid": "nErXDvCkzz",
+	"status": "success",
+	"version": 1
+}
+`
 
-	getDashboardResponse = `{
-		"dashboard": {
-			"id": 1,
-			"uid": "cIBgcSjkk",
-			"title": "Production Overview",
-			"version": 0
-		},
-		"meta": {
-			"isStarred": false,
-			"url": "/d/cIBgcSjkk/production-overview",
-			"slug": "production-overview"
-		}
-	}`
-  
-	getDashboardsJSON = `[
-    {
-      "id": 1,
-      "uid": "RGAPB1cZz",
-      "title": "Grafana Stats",
-      "uri": "db/grafana-stats",
-      "url": "/dashboards/d/RGAPB1cZz/grafana-stat",
-      "slug": "",
-      "type": "dash-db",
-      "tags": [],
-      "isStarred": false
-    }
-  ]`
+	getDashboardResponse = `
+{
+	"dashboard": {
+		"id": 1,
+		"uid": "cIBgcSjkk",
+		"title": "Production Overview",
+		"version": 0
+	},
+	"meta": {
+		"isStarred": false,
+		"url": "/d/cIBgcSjkk/production-overview",
+		"slug": "production-overview"
+	}
+}
+`
+
+	getDashboardsJSON = `
+[
+	{
+		"id": 1,
+		"uid": "RGAPB1cZz",
+		"title": "Grafana Stats",
+		"uri": "db/grafana-stats",
+		"url": "/dashboards/d/RGAPB1cZz/grafana-stat",
+		"slug": "",
+		"type": "dash-db",
+		"tags": [],
+		"isStarred": false
+	}
+]
+`
 )
 
 func TestDashboardCreateAndUpdate(t *testing.T) {
@@ -138,7 +144,7 @@ func TestDashboardDelete(t *testing.T) {
 		if err == nil {
 			t.Errorf("%d not detected", code)
 		}
-  }
+	}
 }
 
 func TestDashboards(t *testing.T) {

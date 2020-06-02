@@ -5,8 +5,18 @@ import (
 )
 
 const (
-	createUserJSON = `{"id":1,"message":"User created"}`
-	deleteUserJSON = `{"message":"User deleted"}`
+	createUserJSON = `
+{
+	"id": 1,
+	"message": "User created"
+}
+`
+
+	deleteUserJSON = `
+{
+	"message": "User deleted"
+}
+`
 )
 
 func TestCreateUser(t *testing.T) {

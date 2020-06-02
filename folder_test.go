@@ -9,77 +9,81 @@ import (
 const (
 	getFoldersJSON = `
 [
-  {
-    "id":1,
-    "uid": "nErXDvCkzz",
-    "title": "Departmenet ABC",
-    "url": "/dashboards/f/nErXDvCkzz/department-abc",
-    "hasAcl": false,
-    "canSave": true,
-    "canEdit": true,
-    "canAdmin": true,
-    "createdBy": "admin",
-    "created": "2018-01-31T17:43:12+01:00",
-    "updatedBy": "admin",
-    "updated": "2018-01-31T17:43:12+01:00",
-    "version": 1
-  }
+	{
+		"id": 1,
+		"uid": "nErXDvCkzz",
+		"title": "Departmenet ABC",
+		"url": "/dashboards/f/nErXDvCkzz/department-abc",
+		"hasAcl": false,
+		"canSave": true,
+		"canEdit": true,
+		"canAdmin": true,
+		"createdBy": "admin",
+		"created": "2018-01-31T17:43:12+01:00",
+		"updatedBy": "admin",
+		"updated": "2018-01-31T17:43:12+01:00",
+		"version": 1
+	}
 ]
-	`
+`
+
 	getFolderJSON = `
 {
-  "id":1,
-  "uid": "nErXDvCkzz",
-  "title": "Departmenet ABC",
-  "url": "/dashboards/f/nErXDvCkzz/department-abc",
-  "hasAcl": false,
-  "canSave": true,
-  "canEdit": true,
-  "canAdmin": true,
-  "createdBy": "admin",
-  "created": "2018-01-31T17:43:12+01:00",
-  "updatedBy": "admin",
-  "updated": "2018-01-31T17:43:12+01:00",
-  "version": 1
+	"id": 1,
+	"uid": "nErXDvCkzz",
+	"title": "Departmenet ABC",
+	"url": "/dashboards/f/nErXDvCkzz/department-abc",
+	"hasAcl": false,
+	"canSave": true,
+	"canEdit": true,
+	"canAdmin": true,
+	"createdBy": "admin",
+	"created": "2018-01-31T17:43:12+01:00",
+	"updatedBy": "admin",
+	"updated": "2018-01-31T17:43:12+01:00",
+	"version": 1
 }
 `
+
 	createdFolderJSON = `
 {
-  "id":1,
-  "uid": "nErXDvCkzz",
-  "title": "Departmenet ABC",
-  "url": "/dashboards/f/nErXDvCkzz/department-abc",
-  "hasAcl": false,
-  "canSave": true,
-  "canEdit": true,
-  "canAdmin": true,
-  "createdBy": "admin",
-  "created": "2018-01-31T17:43:12+01:00",
-  "updatedBy": "admin",
-  "updated": "2018-01-31T17:43:12+01:00",
-  "version": 1
+	"id": 1,
+	"uid": "nErXDvCkzz",
+	"title": "Departmenet ABC",
+	"url": "/dashboards/f/nErXDvCkzz/department-abc",
+	"hasAcl": false,
+	"canSave": true,
+	"canEdit": true,
+	"canAdmin": true,
+	"createdBy": "admin",
+	"created": "2018-01-31T17:43:12+01:00",
+	"updatedBy": "admin",
+	"updated": "2018-01-31T17:43:12+01:00",
+	"version": 1
 }
 `
+
 	updatedFolderJSON = `
 {
-  "id":1,
-  "uid": "nErXDvCkzz",
-  "title": "Departmenet DEF",
-  "url": "/dashboards/f/nErXDvCkzz/department-def",
-  "hasAcl": false,
-  "canSave": true,
-  "canEdit": true,
-  "canAdmin": true,
-  "createdBy": "admin",
-  "created": "2018-01-31T17:43:12+01:00",
-  "updatedBy": "admin",
-  "updated": "2018-01-31T17:43:12+01:00",
-  "version": 1
+	"id": 1,
+	"uid": "nErXDvCkzz",
+	"title": "Departmenet DEF",
+	"url": "/dashboards/f/nErXDvCkzz/department-def",
+	"hasAcl": false,
+	"canSave": true,
+	"canEdit": true,
+	"canAdmin": true,
+	"createdBy": "admin",
+	"created": "2018-01-31T17:43:12+01:00",
+	"updatedBy": "admin",
+	"updated": "2018-01-31T17:43:12+01:00",
+	"version": 1
 }
 `
+
 	deletedFolderJSON = `
 {
-  "message":"Folder deleted"
+	"message": "Folder deleted"
 }
 `
 )

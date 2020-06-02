@@ -5,36 +5,40 @@ import (
 )
 
 const (
-	createAndUpdatePlaylistResponse = `  {
-		"id": 1,
-		"name": "my playlist",
-		"interval": "5m"
-	}`
+	createAndUpdatePlaylistResponse = `
+{
+	"id": 1,
+	"name": "my playlist",
+	"interval": "5m"
+}
+`
 
-	getPlaylistResponse = `{
-		"id" : 2,
-		"name": "my playlist",
-		"interval": "5m",
-		"orgId": "my org",
-		"items": [
-			{
-				"id": 1,
-				"playlistId": 1,
-				"type": "dashboard_by_id",
-				"value": "3",
-				"order": 1,
-				"title":"my dasboard"
-			},
-			{
-				"id": 1,
-				"playlistId": 1,
-				"type": "dashboard_by_id",
-				"value": "3",
-				"order": 1,
-				"title":"my dasboard"
-			}
-		]
-	}`
+	getPlaylistResponse = `
+{
+	"id": 2,
+	"name": "my playlist",
+	"interval": "5m",
+	"orgId": "my org",
+	"items": [
+		{
+			"id": 1,
+			"playlistId": 1,
+			"type": "dashboard_by_id",
+			"value": "3",
+			"order": 1,
+			"title": "my dashboard"
+		},
+		{
+			"id": 1,
+			"playlistId": 1,
+			"type": "dashboard_by_id",
+			"value": "3",
+			"order": 1,
+			"title": "my dashboard"
+		}
+	]
+}
+`
 )
 
 func TestPlaylistCreateAndUpdate(t *testing.T) {

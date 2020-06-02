@@ -7,7 +7,13 @@ import (
 )
 
 const (
-	createdDataSourceJSON = `{"id":1,"message":"Datasource added", "name": "test_datasource"}`
+	createdDataSourceJSON = `
+{
+	"id": 1,
+	"message": "Datasource added",
+	"name": "test_datasource"
+}
+`
 )
 
 func TestNewDataSource(t *testing.T) {
