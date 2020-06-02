@@ -7,14 +7,14 @@ import (
 const (
 	createUserJSON = `
 {
-	"id": 1,
-	"message": "User created"
+  "id": 1,
+  "message": "User created"
 }
 `
 
 	deleteUserJSON = `
 {
-	"message": "User deleted"
+  "message": "User deleted"
 }
 `
 )

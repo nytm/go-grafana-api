@@ -9,72 +9,72 @@ import (
 const (
 	getAlertNotificationsJSON = `
 [
-	{
-		"id": 1,
-		"uid": "team-a-email-notifier",
-		"name": "Team A",
-		"type": "email",
-		"isDefault": false,
-		"sendReminder": false,
-		"disableResolveMessage": false,
-		"settings": {
-			"addresses": "dev@grafana.com"
-		},
-		"created": "2018-04-23T14:44:09+02:00",
-		"updated": "2018-08-20T15:47:49+02:00"
-	}
+  {
+    "id": 1,
+    "uid": "team-a-email-notifier",
+    "name": "Team A",
+    "type": "email",
+    "isDefault": false,
+    "sendReminder": false,
+    "disableResolveMessage": false,
+    "settings": {
+      "addresses": "dev@grafana.com"
+    },
+    "created": "2018-04-23T14:44:09+02:00",
+    "updated": "2018-08-20T15:47:49+02:00"
+  }
 ]
 `
 
 	getAlertNotificationJSON = `
 {
-	"id": 1,
-	"uid": "team-a-email-notifier",
-	"name": "Team A",
-	"type": "email",
-	"isDefault": false,
-	"sendReminder": false,
-	"disableResolveMessage": false,
-	"settings": {
-		"addresses": "dev@grafana.com"
-	},
-	"created": "2018-04-23T14:44:09+02:00",
-	"updated": "2018-08-20T15:47:49+02:00"
+  "id": 1,
+  "uid": "team-a-email-notifier",
+  "name": "Team A",
+  "type": "email",
+  "isDefault": false,
+  "sendReminder": false,
+  "disableResolveMessage": false,
+  "settings": {
+    "addresses": "dev@grafana.com"
+  },
+  "created": "2018-04-23T14:44:09+02:00",
+  "updated": "2018-08-20T15:47:49+02:00"
 }
 `
 
 	createdAlertNotificationJSON = `
 {
-	"id": 1,
-	"uid": "new-alert-notification",
-	"name": "Team A",
-	"type": "email",
-	"isDefault": false,
-	"sendReminder": true,
-	"frequency": "15m",
-	"settings": {
-		"addresses": "dev@grafana.com"
-	}
+  "id": 1,
+  "uid": "new-alert-notification",
+  "name": "Team A",
+  "type": "email",
+  "isDefault": false,
+  "sendReminder": true,
+  "frequency": "15m",
+  "settings": {
+    "addresses": "dev@grafana.com"
+  }
 }
 `
 
 	updatedAlertNotificationJSON = `
 {
-	"uid": "new-alert-notification",
-	"name": "Team A",
-	"type": "email",
-	"isDefault": false,
-	"sendReminder": true,
-	"frequency": "15m",
-	"settings": {
-		"addresses": "dev@grafana.com"
-	}
+  "uid": "new-alert-notification",
+  "name": "Team A",
+  "type": "email",
+  "isDefault": false,
+  "sendReminder": true,
+  "frequency": "15m",
+  "settings": {
+    "addresses": "dev@grafana.com"
+  }
 }
 `
 
 	deletedAlertNotificationJSON = `
 {
-	"message": "Notification deleted"
+  "message": "Notification deleted"
 }
 `
 )
