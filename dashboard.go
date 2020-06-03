@@ -6,9 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/url"
-	"os"
 )
 
 type DashboardMeta struct {
@@ -176,9 +174,7 @@ func (c *Client) dashboard(path string) (*Dashboard, error) {
 	result := &Dashboard{}
 	err = json.Unmarshal(data, &result)
 	result.Folder = result.Meta.Folder
-	if os.Getenv("GF_LOG") != "" {
-		log.Printf("got back dashboard response  %s", data)
-	}
+
 	return result, err
 }
 
