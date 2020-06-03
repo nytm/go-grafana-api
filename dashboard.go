@@ -140,13 +140,13 @@ func (c *Client) DashboardByUid(uid string) (*Dashboard, error) {
 	return c.dashboard(fmt.Sprintf("/api/dashboards/uid/%s", uid))
 }
 
-// Dashboard.
+// Dashboard will be removed.
 // Deprecated: Starting from Grafana v5.0. Use DashboardByUid instead.
 func (c *Client) Dashboard(slug string) (*Dashboard, error) {
 	return c.dashboard(fmt.Sprintf("/api/dashboards/db/%s", slug))
 }
 
-// DashboardByUID.
+// DashboardByUID will be removed.
 // Deprecated: Interface typo. Use DashboardByUid instead.
 func (c *Client) DashboardByUID(uid string) (*Dashboard, error) {
 	return c.dashboard(fmt.Sprintf("/api/dashboards/uid/%s", uid))
@@ -182,13 +182,13 @@ func (c *Client) DeleteDashboardByUid(uid string) error {
 	return c.deleteDashboard(fmt.Sprintf("/api/dashboards/uid/%s", uid))
 }
 
-// DeleteDashboard
+// DeleteDashboard will be removed.
 // Deprecated: Starting from Grafana v5.0. Use DeleteDashboardByUid instead.
 func (c *Client) DeleteDashboard(slug string) error {
 	return c.deleteDashboard(fmt.Sprintf("/api/dashboards/db/%s", slug))
 }
 
-// DeleteDashboardByUID
+// DeleteDashboardByUID will be removed.
 // Deprecated: Interface typo. Use DeleteDashboardByUid instead.
 func (c *Client) DeleteDashboardByUID(uid string) error {
 	return c.deleteDashboard(fmt.Sprintf("/api/dashboards/uid/%s", uid))
