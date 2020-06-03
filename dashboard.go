@@ -48,7 +48,8 @@ type Dashboard struct {
 	Overwrite bool                   `json:"overwrite"`
 }
 
-// Deprecated: use NewDashboard instead
+// SaveDashboard.
+// Deprecated: Use NewDashboard instead.
 func (c *Client) SaveDashboard(model map[string]interface{}, overwrite bool) (*DashboardSaveResponse, error) {
 	wrapper := map[string]interface{}{
 		"dashboard": model,
@@ -137,11 +138,18 @@ func (c *Client) Dashboards() ([]DashboardSearchResponse, error) {
 	return dashboards, err
 }
 
-// Deprecated: Starting from Grafana v5.0. Please update to use DashboardByUID instead.
+func (c *Client) DashboardByUid(uid string) (*Dashboard, error) {
+	return c.dashboard(fmt.Sprintf("/api/dashboards/uid/%s", uid))
+}
+
+// Dashboard.
+// Deprecated: Starting from Grafana v5.0. Use DashboardByUid instead.
 func (c *Client) Dashboard(slug string) (*Dashboard, error) {
 	return c.dashboard(fmt.Sprintf("/api/dashboards/db/%s", slug))
 }
 
+// DashboardByUID.
+// Deprecated: Interface typo. Use DashboardByUid instead.
 func (c *Client) DashboardByUID(uid string) (*Dashboard, error) {
 	return c.dashboard(fmt.Sprintf("/api/dashboards/uid/%s", uid))
 }
@@ -174,11 +182,18 @@ func (c *Client) dashboard(path string) (*Dashboard, error) {
 	return result, err
 }
 
-// Deprecated: Starting from Grafana v5.0. Please update to use DeleteDashboardByUID instead.
+func (c *Client) DeleteDashboardByUid(uid string) error {
+	return c.deleteDashboard(fmt.Sprintf("/api/dashboards/uid/%s", uid))
+}
+
+// DeleteDashboard
+// Deprecated: Starting from Grafana v5.0. Use DeleteDashboardByUid instead.
 func (c *Client) DeleteDashboard(slug string) error {
 	return c.deleteDashboard(fmt.Sprintf("/api/dashboards/db/%s", slug))
 }
 
+// DeleteDashboardByUID
+// Deprecated: Interface typo. Use DeleteDashboardByUid instead.
 func (c *Client) DeleteDashboardByUID(uid string) error {
 	return c.deleteDashboard(fmt.Sprintf("/api/dashboards/uid/%s", uid))
 }
