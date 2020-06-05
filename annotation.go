@@ -62,6 +62,29 @@ func (c *Client) Annotations(params url.Values) ([]Annotation, error) {
 	return result, err
 }
 
+// Annotation fetches the annotation queried with the ID and params it's passed.
+// It returns an error if no annotation with a matching ID is found.
+func (c *Client) Annotation(id int64, params url.Values) (Annotation, error) {
+	anno := Annotation{}
+	as, err := c.Annotations(params)
+	if err != nil {
+		return Annotation{}, err
+	}
+
+	for _, a := range as {
+		if a.ID == id {
+			anno = a
+			break
+		}
+	}
+
+	if anno.ID == 0 {
+		return anno, fmt.Errorf("annotation %v not found", id)
+	}
+
+	return anno, nil
+}
+
 // NewAnnotation creates a new annotation with the Annotation it is passed
 func (c *Client) NewAnnotation(a *Annotation) (int64, error) {
 	data, err := json.Marshal(a)

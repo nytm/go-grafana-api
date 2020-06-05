@@ -27,6 +27,25 @@ const (
 			"tag2"
 		],
 		"data": {}
+	}, {
+		"id": 1125,
+		"alertId": 0,
+		"dashboardId": 468,
+		"panelId": 2,
+		"userId": 1,
+		"userName": "",
+		"newState": "",
+		"prevState": "",
+		"time": 1507266395000,
+		"text": "test",
+		"metric": "",
+		"regionId": 1123,
+		"type": "event",
+		"tags": [
+			"tag1",
+			"tag2"
+		],
+		"data": {}
 	}]`
 
 	newAnnotationJSON = `{
@@ -65,6 +84,38 @@ func TestAnnotations(t *testing.T) {
 
 	if as[0].ID != 1124 {
 		t.Error("annotations response should contain annotations with an ID")
+	}
+}
+
+func TestAnnotation(t *testing.T) {
+	server, client := gapiTestTools(200, annotationsJSON)
+	defer server.Close()
+
+	a, err := client.Annotation(1124, url.Values{})
+	if err != nil {
+		t.Error(err)
+	}
+
+	t.Log(pretty.PrettyFormat(a))
+
+	if a.ID != 1124 {
+		t.Error("annotation response should contain the annotation with the correct ID")
+	}
+}
+
+func TestAnnotation_noneFound(t *testing.T) {
+	server, client := gapiTestTools(200, annotationsJSON)
+	defer server.Close()
+
+	a, err := client.Annotation(1, url.Values{})
+	if err.Error() != "annotation 1 not found" {
+		t.Error(err)
+	}
+
+	t.Log(pretty.PrettyFormat(a))
+
+	if a.ID != 0 {
+		t.Error("annotation response should contain an empty annotation when no annotation with a matching ID was found")
 	}
 }
 
