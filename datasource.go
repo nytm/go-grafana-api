@@ -66,6 +66,9 @@ type JSONData struct {
 
 	// Used by PostgreSQL
 	Sslmode         string `json:"sslmode,omitempty"`
+	SslRootCertFile string `json:"sslRootCertFile,omitempty"`
+	SslCertFile     string `json:"sslCertFile,omitempty"`
+	SslKeyFile      string `json:"sslKeyFile,omitempty"`
 	PostgresVersion int64  `json:"postgresVersion,omitempty"`
 	Timescaledb     bool   `json:"timescaledb,omitempty"`
 
