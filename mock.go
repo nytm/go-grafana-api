@@ -40,6 +40,6 @@ func gapiTestTools(code int, body string) (*mockServer, *Client) {
 		Host:   "my-grafana.com",
 	}
 
-	client := &Client{"my-key", url, httpClient}
+	client := &Client{"my-key", url, "1", httpClient}
 	return mock, client
 }
