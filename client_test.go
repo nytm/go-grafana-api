@@ -8,7 +8,7 @@ import (
 )
 
 func TestNew_basicAuth(t *testing.T) {
-	c, err := New("user:pass", "http://my-grafana.com")
+	c, err := New("user:pass", "http://my-grafana.com", nil)
 	if err != nil {
 		t.Errorf("expected error to be nil; got: %s", err.Error())
 	}
@@ -20,7 +20,7 @@ func TestNew_basicAuth(t *testing.T) {
 }
 
 func TestNew_tokenAuth(t *testing.T) {
-	c, err := New("123", "http://my-grafana.com")
+	c, err := New("123", "http://my-grafana.com", nil)
 	if err != nil {
 		t.Errorf("expected error to be nil; got: %s", err.Error())
 	}
@@ -37,7 +37,7 @@ func TestNew_tokenAuth(t *testing.T) {
 }
 
 func TestNew_invalidURL(t *testing.T) {
-	_, err := New("123", "://my-grafana.com")
+	_, err := New("123", "://my-grafana.com", nil)
 
 	expected := "parse \"://my-grafana.com\": missing protocol scheme"
 	if err.Error() != expected {
