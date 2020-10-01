@@ -66,11 +66,11 @@ func (c *Client) SearchTeam(query string) (*SearchTeam, error) {
 }
 
 // Team fetches and returns the Grafana team whose ID it's passed.
-func (c *Client) Team(id int64) (*Team, error) {
-	team := &Team{}
-	err := c.request("GET", fmt.Sprintf("/api/teams/%d", id), nil, nil, team)
+func (c *Client) Team(id int64) (Team, error) {
+	team := Team{}
+	err := c.request("GET", fmt.Sprintf("/api/teams/%d", id), nil, nil, &team)
 	if err != nil {
-		return nil, err
+		return team, err
 	}
 
 	return team, nil
@@ -79,18 +79,31 @@ func (c *Client) Team(id int64) (*Team, error) {
 // AddTeam makes a new team
 // email arg is an optional value.
 // If you don't want to set email, please set "" (empty string).
-func (c *Client) AddTeam(name string, email string) error {
+// When team creation is successful, returns the team id
+func (c *Client) AddTeam(name string, email string) (int64, error) {
+	id := int64(0)
 	path := fmt.Sprintf("/api/teams")
+
 	team := Team{
 		Name:  name,
 		Email: email,
 	}
 	data, err := json.Marshal(team)
 	if err != nil {
-		return err
+		return id, err
 	}
 
-	return c.request("POST", path, nil, bytes.NewBuffer(data), nil)
+	tmp := struct {
+		Id int64 `json:"teamId"`
+	}{}
+
+	err = c.request("POST", path, nil, bytes.NewBuffer(data), &tmp)
+
+	if err != nil {
+		return id, err
+	}
+
+	return tmp.Id, err
 }
 
 // UpdateTeam updates a Grafana team.
