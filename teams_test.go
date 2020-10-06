@@ -135,7 +135,7 @@ func TestTeam(t *testing.T) {
 
 	t.Log(pretty.PrettyFormat(resp))
 
-	expect := Team{
+	expect := &Team{
 		Id:          1,
 		OrgId:       1,
 		Name:        "MyTestTeam",
