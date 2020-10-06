@@ -68,9 +68,9 @@ func (c *Client) SearchTeam(query string) (*SearchTeam, error) {
 // Team fetches and returns the Grafana team whose ID it's passed.
 func (c *Client) Team(id int64) (*Team, error) {
 	team := &Team{}
-	err := c.request("GET", fmt.Sprintf("/api/teams/%d", id), nil, nil, &team)
+	err := c.request("GET", fmt.Sprintf("/api/teams/%d", id), nil, nil, team)
 	if err != nil {
-		return team, err
+		return nil, err
 	}
 
 	return team, nil
