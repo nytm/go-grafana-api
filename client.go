@@ -21,11 +21,13 @@ type Client struct {
 	key     string
 	baseURL url.URL
 	*http.Client
+	headers map[string]string
 }
 
 //New creates a new grafana client
 //auth can be in user:pass format, or it can be an api key
-func New(auth, baseURL string) (*Client, error) {
+//headers specifies additional HTTP headers, or nil
+func New(auth string, baseURL string, headers map[string]string) (*Client, error) {
 	u, err := url.Parse(baseURL)
 	if err != nil {
 		return nil, err
@@ -41,6 +43,7 @@ func New(auth, baseURL string) (*Client, error) {
 		key,
 		*u,
 		cleanhttp.DefaultClient(),
+		headers,
 	}, nil
 }
 
@@ -90,6 +93,11 @@ func (c *Client) newRequest(method, requestPath string, query url.Values, body i
 	}
 	if c.key != "" {
 		req.Header.Add("Authorization", c.key)
+	}
+	if c.headers != nil {
+		for k, v := range c.headers {
+			req.Header.Add(k, v)
+		}
 	}
 
 	if os.Getenv("GF_LOG") != "" {
