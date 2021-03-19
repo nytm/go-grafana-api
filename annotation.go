@@ -27,6 +27,10 @@ type Annotation struct {
 	IsRegion    bool     `json:"isRegion,omitempty"`
 }
 
+var (
+	annotationsPath string = "/api/annotations"
+)
+
 // GraphiteAnnotation represents a Grafana API annotation in Graphite format
 type GraphiteAnnotation struct {
 	What string   `json:"what"`
@@ -38,7 +42,7 @@ type GraphiteAnnotation struct {
 // Annotations fetches the annotations queried with the params it's passed
 func (c *Client) Annotations(params url.Values) ([]Annotation, error) {
 	result := []Annotation{}
-	err := c.request("GET", "/api/annotation", params, nil, &result)
+	err := c.request("GET", annotationsPath, params, nil, &result)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +61,7 @@ func (c *Client) NewAnnotation(a *Annotation) (int64, error) {
 		ID int64 `json:"id"`
 	}{}
 
-	err = c.request("POST", "/api/annotations", nil, bytes.NewBuffer(data), &result)
+	err = c.request("POST", annotationsPath, nil, bytes.NewBuffer(data), &result)
 	if err != nil {
 		return 0, err
 	}
@@ -76,7 +80,7 @@ func (c *Client) NewGraphiteAnnotation(gfa *GraphiteAnnotation) (int64, error) {
 		ID int64 `json:"id"`
 	}{}
 
-	err = c.request("POST", "/api/annotations/graphite", nil, bytes.NewBuffer(data), &result)
+	err = c.request("POST", annotationsPath+"/graphite", nil, bytes.NewBuffer(data), &result)
 	if err != nil {
 		return 0, err
 	}
@@ -86,7 +90,7 @@ func (c *Client) NewGraphiteAnnotation(gfa *GraphiteAnnotation) (int64, error) {
 
 // UpdateAnnotation updates all properties an existing annotation with the Annotation it is passed.
 func (c *Client) UpdateAnnotation(id int64, a *Annotation) (string, error) {
-	path := fmt.Sprintf("/api/annotations/%d", id)
+	path := fmt.Sprintf("%s/%d", annotationsPath, id)
 	data, err := json.Marshal(a)
 	if err != nil {
 		return "", err
@@ -106,7 +110,7 @@ func (c *Client) UpdateAnnotation(id int64, a *Annotation) (string, error) {
 
 // PatchAnnotation updates one or more properties of an existing annotation that matches the specified ID.
 func (c *Client) PatchAnnotation(id int64, a *Annotation) (string, error) {
-	path := fmt.Sprintf("/api/annotations/%d", id)
+	path := fmt.Sprintf("%s/%d", annotationsPath, id)
 	data, err := json.Marshal(a)
 	if err != nil {
 		return "", err
@@ -126,7 +130,7 @@ func (c *Client) PatchAnnotation(id int64, a *Annotation) (string, error) {
 
 // DeleteAnnotation deletes the annotation of the ID it is passed
 func (c *Client) DeleteAnnotation(id int64) (string, error) {
-	path := fmt.Sprintf("/api/annotations/%d", id)
+	path := fmt.Sprintf("%s/%d", annotationsPath, id)
 	result := struct {
 		Message string `json:"message"`
 	}{}
@@ -141,7 +145,7 @@ func (c *Client) DeleteAnnotation(id int64) (string, error) {
 
 // DeleteAnnotationByRegionID deletes the annotation corresponding to the region ID it is passed
 func (c *Client) DeleteAnnotationByRegionID(id int64) (string, error) {
-	path := fmt.Sprintf("/api/annotations/region/%d", id)
+	path := fmt.Sprintf("%s/region/%d", annotationsPath, id)
 	result := struct {
 		Message string `json:"message"`
 	}{}
