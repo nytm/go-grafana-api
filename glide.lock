@@ -1,0 +1,6 @@
+hash: 36e07f9b169213af00ef3c5d32f5fb5c5a6b149592de00f16819ae6ff52ca7e6
+updated: 2018-11-21T14:39:51.269588+08:00
+imports: []
+testImports:
+- name: github.com/gobs/pretty
+  version: 09732c25a95b8e10e85177a3201cf4c7fe35a377
