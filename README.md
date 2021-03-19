@@ -13,8 +13,22 @@ Grafana HTTP API Client for Go
 
 ## Tests
 
-To run the tests:
+To run unit tests:
 
 ```
-go test
+make test
+```
+
+To run integration tests:
+
+Start a `localhost:3000` Grafana:
+
+```
+make serve-grafana
+```
+
+Run the integration tests:
+
+```
+make integration-test:
 ```
